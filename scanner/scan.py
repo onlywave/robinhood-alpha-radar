@@ -311,11 +311,11 @@ def enrich_onchain(cands, prev_by_token):
         elif sc is not None:
             oc["contract_verified"] = False
 
-        # owner(): 0x0 = renounced; assente = nessuna funzione owner
-        ores = eth_call(ta, "0x8da5cb5b", rpc)
-        if ores is None:
-            oc["owner_status"] = None          # RPC non ha risposto
-        elif ores in ("0x", "0x0"):
+        # owner(): 0x0 = renounced; revert/vuoto = nessuna funzione owner
+        st, ores = eth_call_status(ta, "0x8da5cb5b", rpc)
+        if st == "fail":
+            oc["owner_status"] = None          # RPC non ha risposto: N/D
+        elif st == "revert" or ores in ("0x", "0x0", None):
             oc["owner_status"] = "assente"     # il contratto non espone owner()
         else:
             owner = "0x" + ores[-40:]
@@ -560,6 +560,29 @@ def eth_call(to, data, rpc):
     return rpc_call("eth_call", [{"to": to, "data": data}, "latest"], rpc)
 
 
+def eth_call_status(to, data, rpc_url):
+    """eth_call che distingue: ('ok', result) / ('revert', None) = la funzione
+    non esiste o rifiuta / ('fail', None) = problema di rete-RPC."""
+    body = json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_call",
+                       "params": [{"to": to, "data": data}, "latest"]}).encode()
+    for attempt in range(3):
+        try:
+            req = urllib.request.Request(
+                rpc_url, data=body,
+                headers={**UA, "Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=25, context=SSL_CTX) as r:
+                d = json.loads(r.read().decode())
+            if "error" in d:
+                msg = str(d["error"]).lower()
+                if "revert" in msg or "execution" in msg or "invalid opcode" in msg:
+                    return "revert", None
+                return "fail", None
+            return "ok", d.get("result")
+        except Exception:
+            time.sleep(2)
+    return "fail", None
+
+
 def decode_abi_string(hexres):
     """Decodifica il risultato di symbol(): stringa ABI o bytes32."""
     if not hexres or hexres == "0x":
@@ -766,6 +789,119 @@ def fetch_wallet(wcfg):
     return out
 
 
+# ------------------------------------------- valutazione posizioni wallet
+
+def build_candidate_from_pair(token_addr):
+    """Candidato costruito dal miglior pair DexScreener: serve per valutare
+    asset in portafoglio che non compaiono tra i pool nuovi/trending."""
+    d = http_json(f"https://api.dexscreener.com/tokens/v1/"
+                  f"{CONFIG['primary_chain']['dexscreener_id']}/{token_addr}")
+    pairs = sorted(d or [], key=lambda p: fnum((p.get("liquidity") or {}).get("usd")),
+                   reverse=True)
+    if not pairs:
+        return None
+    p = pairs[0]
+    tx = (p.get("txns") or {}).get("h24") or {}
+    created = p.get("pairCreatedAt")
+    age_h = (time.time() - created / 1000) / 3600 if created else None
+    info = p.get("info") or {}
+    return {
+        "network": "robinhood",
+        "pool_address": p.get("pairAddress"),
+        "pool_name": None,
+        "token_address": token_addr,
+        "token_symbol": (p.get("baseToken") or {}).get("symbol"),
+        "token_name": (p.get("baseToken") or {}).get("name"),
+        "quote_symbol": (p.get("quoteToken") or {}).get("symbol"),
+        "price_usd": fnum(p.get("priceUsd"), None),
+        "liquidity_usd": fnum((p.get("liquidity") or {}).get("usd")),
+        "vol_h1": fnum((p.get("volume") or {}).get("h1")),
+        "vol_h24": fnum((p.get("volume") or {}).get("h24")),
+        "buys_h24": int(fnum(tx.get("buys"))),
+        "sells_h24": int(fnum(tx.get("sells"))),
+        "chg_h1": (p.get("priceChange") or {}).get("h1"),
+        "chg_h24": fnum((p.get("priceChange") or {}).get("h24"), None),
+        "market_cap_usd": fnum(p.get("marketCap"), None) or None,
+        "fdv_usd": fnum(p.get("fdv"), None) or None,
+        "pool_created_at": None,
+        "age_hours": round(age_h, 1) if age_h else None,
+        "ds_url": p.get("url"),
+        "websites": [x.get("url") for x in info.get("websites", []) if x.get("url")],
+        "socials": [{"type": s.get("type"), "url": s.get("url")}
+                    for s in info.get("socials", []) if s.get("url")],
+    }
+
+
+def assess_positions(w, screened, scr, weights, bridge_flow, prev_by_token):
+    """Valuta ogni posizione rilevante del wallet con GLI STESSI criteri dello
+    screening candidati (score, gate BUY, red flag) + fattibilità di uscita."""
+    by_token = {(c.get("token_address") or "").lower(): c for c in screened}
+    minval = CONFIG.get("min_position_value_usd", 10)
+    out = []
+    for pos in w.get("positions", []):
+        if pos.get("value_usd") is None or pos["value_usd"] < minval:
+            continue
+        ta = pos["token_address"]
+        cand = by_token.get(ta)
+        if cand is None:
+            c = build_candidate_from_pair(ta)
+            if c:
+                enrich_onchain([c], prev_by_token)
+                cand = screen_and_score(c, scr, weights, bridge_flow)
+        a = {"token_address": ta, "symbol": pos["symbol"],
+             "value_usd": pos["value_usd"]}
+        if cand is None:
+            a["classification"] = "SOTTO SCREENING"
+            a["comment"] = (
+                "Non supera nemmeno lo screening minimo del radar (liquidità "
+                f"≥${scr['min_liquidity_usd']:,} e ≥{scr['min_txns_h24']} "
+                "transazioni/24h): posizione illiquida o inattiva, difficile da "
+                "valutare e da vendere. Richiede verifica manuale.")
+        else:
+            liq = cand["liquidity_usd"]
+            exit_impact = round(100 * pos["value_usd"] / (liq / 2), 2) if liq else None
+            oc = cand.get("onchain") or {}
+            a.update({
+                "classification": cand["classification"],
+                "score_norm": cand.get("score_norm"),
+                "coverage_pct": cand.get("score_coverage_pct"),
+                "buy_missing": cand.get("buy_missing", [])[:4],
+                "red_flags": cand.get("red_flags", []),
+                "cautions": cand.get("cautions", []),
+                "holders_count": oc.get("holders_count"),
+                "top10_adjusted_pct": oc.get("top10_adjusted_pct"),
+                "contract_verified": oc.get("contract_verified"),
+                "owner_status": oc.get("owner_status"),
+                "exit_impact_pct": exit_impact,
+                "liquidity_usd": liq,
+                "chg_h24": cand.get("chg_h24"),
+            })
+            cls = cand["classification"]
+            miss = "; ".join(cand.get("buy_missing", [])[:3])
+            if cls == "ALPHA BUY ALERT":
+                comment = ("L'asset supera anche oggi tutti i gate del radar: "
+                           "qualità confermata dai dati correnti.")
+            elif cls == "HIGH-PRIORITY WATCH":
+                comment = ("Metriche solide ma sotto la soglia BUY. "
+                           f"Manca: {miss}. Posizione difendibile, da monitorare.")
+            elif cls in ("WATCHLIST", "DISCOVERY"):
+                comment = ("Tenibile ma con riserve rispetto ai criteri del "
+                           f"radar. Manca: {miss}.")
+            else:  # AVOID
+                comment = ("⚠️ Red flag materiale sui dati correnti: "
+                           + "; ".join(cand.get("red_flags", [])[:2])
+                           + ". Valutare riduzione o uscita (decisione tua).")
+            if cand.get("red_flags") and cls != "AVOID":
+                comment += " Red flag: " + "; ".join(cand["red_flags"][:2]) + "."
+            if exit_impact is not None:
+                comment += (f" Uscita: vendere tutta la posizione "
+                            f"(~${pos['value_usd']:,.0f}) muoverebbe il prezzo "
+                            f"di ~{exit_impact}% (liquidità ${liq:,.0f}).")
+            a["comment"] = comment
+        out.append(a)
+    w["position_assessments"] = out
+
+
 # ------------------------------------------------------------------ watchlist
 
 def fetch_watchlist():
@@ -919,8 +1055,10 @@ def main():
     print("[4/7] Watchlist handoff (DexScreener)…")
     watchlist = fetch_watchlist()
 
-    print("[5/7] Wallet monitorati (Blockscout + RPC)…")
+    print("[5/7] Wallet monitorati (Blockscout + RPC) + valutazione posizioni…")
     wallets = [fetch_wallet(w) for w in CONFIG.get("wallets", [])]
+    for w in wallets:
+        assess_positions(w, screened, scr, weights, bridge_flow, prev_by_token)
 
     print("[6/7] Radar globale chain secondarie (GeckoTerminal)…")
     global_radar = []

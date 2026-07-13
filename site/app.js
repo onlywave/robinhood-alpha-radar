@@ -256,6 +256,21 @@ function renderWallets(d) {
         <thead><tr><th>Asset</th><th>Quantità</th><th>Prezzo</th><th>Valore</th><th>Allocazione</th><th>Fonte prezzo</th></tr></thead>
         <tbody>${nativeRow}${posRows || `<tr><td colspan="6" class="empty">nessuna posizione sopra $${MIN_POSITION_USD}</td></tr>`}</tbody>
       </table></div>
+      ${(w.position_assessments || []).length ? `
+      <h3 style="margin-top:16px">Valutazione delle posizioni
+        <span class="tag inf">stessi criteri dello screening, ricontrollati ogni ora</span></h3>
+      ${w.position_assessments.map((a) => `<div class="assess ${a.classification === "AVOID" ? "assess-bad" : ""}">
+        <div class="assess-head">${badge(a.classification)}
+          <strong>${esc(a.symbol)}</strong>
+          <span class="cov">${a.value_usd !== undefined ? fmtUSD(a.value_usd, false) : ""}</span>
+          ${a.score_norm !== undefined && a.score_norm !== null
+            ? `<span class="cov">score ${a.score_norm}/100 (copertura ${a.coverage_pct}%)</span>` : ""}
+          ${a.holders_count ? `<span class="cov">${fmtN(a.holders_count)} holder · top-10 ${a.top10_adjusted_pct ?? "N/D"}% ·
+            ${a.contract_verified === true ? "contratto ✓" : a.contract_verified === false ? "contratto NON verificato" : "verifica N/D"} ·
+            owner ${esc(a.owner_status || "N/D")}</span>` : ""}
+        </div>
+        <p class="assess-comment">${esc(a.comment)}</p>
+      </div>`).join("")}` : ""}
       <h3 style="margin-top:16px">Operazioni recenti <span class="tag fact">eventi Transfer on-chain</span></h3>
       <div class="table-wrap"><table>
         <thead><tr><th>Data (Zurich)</th><th>Dir</th><th>Asset</th><th>Quantità</th><th>Valore attuale</th><th>Controparte / tx</th></tr></thead>
