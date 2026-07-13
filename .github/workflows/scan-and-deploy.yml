@@ -14,11 +14,12 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true   # l'ultima scansione vince: mai accodarsi a run bloccate
 
 jobs:
   scan-and-deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

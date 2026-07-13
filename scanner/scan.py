@@ -40,6 +40,20 @@ UA_BROWSER = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
               "Accept": "application/json"}
 
 GT_LAST_CALL = [0.0]  # GeckoTerminal: max 30 req/min -> spaziare le chiamate
+BS_FAILS = [0]        # circuit-breaker Blockscout (istanza instabile)
+
+
+def bs_json(url, retries=2):
+    """GET Blockscout con circuit-breaker: dopo troppi fallimenti consecutivi
+    smette di chiamare (i dati restano N/D invece di bloccare lo scan)."""
+    if BS_FAILS[0] >= 8:
+        return None
+    d = http_json(url, retries=retries, timeout=12, headers=UA_BROWSER)
+    if d is None:
+        BS_FAILS[0] += 1
+    else:
+        BS_FAILS[0] = max(0, BS_FAILS[0] - 2)
+    return d
 
 
 def _ssl_context():
@@ -279,20 +293,17 @@ def enrich_onchain(cands, prev_by_token):
               "creator_share_pct": None, "total_supply": None}
         time.sleep(0.4)  # gentile con Blockscout
 
-        tk = http_json(f"{explorer}/api/v2/tokens/{ta}",
-                       headers=UA_BROWSER, retries=3)
+        tk = bs_json(f"{explorer}/api/v2/tokens/{ta}", retries=3)
         if tk and isinstance(tk, dict):
             oc["holders_count"] = int(fnum(tk.get("holders_count")
                                            or tk.get("holders"), 0)) or None
             oc["total_supply"] = fnum(tk.get("total_supply"), None)
 
-        info = http_json(f"{explorer}/api/v2/addresses/{ta}",
-                         headers=UA_BROWSER, retries=2)
+        info = bs_json(f"{explorer}/api/v2/addresses/{ta}", retries=2)
         if info and isinstance(info, dict):
             oc["creator"] = info.get("creator_address_hash")
 
-        sc = http_json(f"{explorer}/api/v2/smart-contracts/{ta}",
-                       headers=UA_BROWSER, retries=2)
+        sc = bs_json(f"{explorer}/api/v2/smart-contracts/{ta}", retries=2)
         if sc and isinstance(sc, dict):
             oc["contract_verified"] = bool(sc.get("is_verified")
                                            or sc.get("source_code")
@@ -311,8 +322,7 @@ def enrich_onchain(cands, prev_by_token):
             oc["owner_status"] = ("renounced" if int(owner, 16) == 0
                                   else f"attivo:{owner}")
 
-        holders = http_json(f"{explorer}/api/v2/tokens/{ta}/holders",
-                            headers=UA_BROWSER, retries=3)
+        holders = bs_json(f"{explorer}/api/v2/tokens/{ta}/holders", retries=3)
         if holders and isinstance(holders, dict) and oc["total_supply"]:
             pool = (c.get("pool_address") or "").lower()
             creator = (oc["creator"] or "").lower()
@@ -611,8 +621,7 @@ def fetch_wallet(wcfg):
     touched_tokens = {l["address"].lower() for l in all_logs}
 
     # --- info indirizzo + saldo nativo (fatto)
-    info = http_json(f"{explorer}/api/v2/addresses/{addr}",
-                     headers=UA_BROWSER, retries=3)
+    info = bs_json(f"{explorer}/api/v2/addresses/{addr}", retries=3)
     if info and isinstance(info, dict):
         out["native_eth"] = int(info.get("coin_balance") or 0) / 1e18
         out["eth_price_usd"] = fnum(info.get("exchange_rate"), None)
@@ -630,8 +639,7 @@ def fetch_wallet(wcfg):
                                     .get("coingecko:ethereum", {}).get("price"), None)
 
     # --- posizioni token (fatto; prezzo = stima)
-    balances = http_json(f"{explorer}/api/v2/addresses/{addr}/token-balances",
-                         headers=UA_BROWSER, retries=3)
+    balances = bs_json(f"{explorer}/api/v2/addresses/{addr}/token-balances", retries=3)
     token_meta = {}  # addr_lower -> (symbol, decimals)
     positions = []
     if isinstance(balances, list):
@@ -713,7 +721,7 @@ def fetch_wallet(wcfg):
     for l, _ in events:
         ta = l["address"].lower()
         if ta not in token_meta:
-            tk = http_json(f"{explorer}/api/v2/tokens/{ta}", headers=UA_BROWSER)
+            tk = bs_json(f"{explorer}/api/v2/tokens/{ta}")
             if tk and isinstance(tk, dict) and tk.get("symbol"):
                 token_meta[ta] = (tk.get("symbol"),
                                   int(tk.get("decimals") or 18))
