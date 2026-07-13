@@ -1,0 +1,48 @@
+{
+  "site_url": "",
+  "primary_chain": {
+    "defillama_name": "Robinhood Chain",
+    "geckoterminal_id": "robinhood",
+    "dexscreener_id": "robinhood",
+    "chain_id": 4663
+  },
+  "secondary_networks": [
+    {"label": "Solana", "geckoterminal_id": "solana", "dexscreener_id": "solana"},
+    {"label": "Base", "geckoterminal_id": "base", "dexscreener_id": "base"},
+    {"label": "HyperEVM", "geckoterminal_id": "hyperevm", "dexscreener_id": "hyperliquid"},
+    {"label": "Monad", "geckoterminal_id": "monad", "dexscreener_id": "monad"},
+    {"label": "MegaETH", "geckoterminal_id": "megaeth", "dexscreener_id": "megaeth"},
+    {"label": "Sui", "geckoterminal_id": "sui-network", "dexscreener_id": "sui"},
+    {"label": "Berachain", "geckoterminal_id": "berachain", "dexscreener_id": "berachain"}
+  ],
+  "watchlist": [
+    {"name": "CASHCAT", "query": "CASHCAT", "match_symbols": ["CASHCAT"], "chain": "robinhood", "handoff_state": "WATCHLIST", "note": "Progetto rilevante nell'ecosistema, forte visibilità. Non classificato come nuovo buy: verificare distribuzione e qualità dei flussi."},
+    {"name": "4663", "query": "4663", "match_symbols": ["4663"], "chain": "robinhood", "handoff_state": "WATCHLIST / BENCHMARK", "note": "Benchmark dei nuovi token della chain (il nome riprende il chain-id 4663). Nessuna convergenza sufficiente per nuovo ingresso nelle analisi precedenti."},
+    {"name": "LIT / Lighter", "query": "lighter", "match_symbols": ["LIT", "LIGHTER"], "chain": "robinhood", "handoff_state": "ECOSYSTEM WATCH", "note": "Ecosistema da seguire (incentivi). Non confondere token, punti e asset ufficialmente negoziabili."},
+    {"name": "Arcus", "query": "arcus", "match_symbols": ["ARCUS"], "chain": "robinhood", "handoff_state": "INFRASTRUCTURE WATCH", "note": "Infrastruttura interessante (connessioni ecosistema dYdX). Nessun token proprio chiaramente negoziabile all'ultima analisi: non inventare ticker o contract."}
+  ],
+  "screening": {
+    "min_liquidity_usd": 25000,
+    "watch_liquidity_usd": 150000,
+    "strong_liquidity_usd": 300000,
+    "min_txns_h24": 30,
+    "hpw_txns_h24": 300,
+    "max_age_days_early": 14,
+    "ultra_early_hours": 72,
+    "wash_vol_liq_ratio": 25,
+    "min_liq_mcap_ratio": 0.01,
+    "extreme_buy_ratio": 0.88
+  },
+  "score_weights": {
+    "smart_money": 25,
+    "team_proximity": 20,
+    "liquidity": 15,
+    "holder_growth": 10,
+    "deployer": 10,
+    "social_velocity": 10,
+    "github_dev": 5,
+    "bridge_flow": 5
+  },
+  "max_candidates_shown": 25,
+  "history_max_points": 1000
+}

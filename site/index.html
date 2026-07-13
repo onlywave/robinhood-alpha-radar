@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Robinhood Chain — Alpha Radar</title>
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>">
+</head>
+<body>
+<header>
+  <div class="header-row">
+    <h1>📡 Robinhood Chain <span class="accent">Alpha Radar</span></h1>
+    <div id="op-state" class="op-badge">…</div>
+  </div>
+  <p class="subtitle">Intelligence early-stage multi-segnale · scansione automatica ogni ora ·
+    <span id="generated-at">caricamento…</span></p>
+  <p id="op-note" class="op-note"></p>
+</header>
+
+<main>
+  <section id="chain-status">
+    <h2>Stato della chain</h2>
+    <div class="cards" id="status-cards"></div>
+    <div class="split">
+      <div class="panel">
+        <h3>Protocolli per TVL <span class="tag fact">fatto (DefiLlama)</span></h3>
+        <table id="tvl-protocols"></table>
+      </div>
+      <div class="panel">
+        <h3>DEX per volume 24h <span class="tag fact">fatto (DefiLlama)</span></h3>
+        <table id="dex-protocols"></table>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Storico TVL / volume <span class="tag est">stima</span></h3>
+      <div id="sparklines" class="sparklines"></div>
+    </div>
+  </section>
+
+  <section id="candidates">
+    <h2>Candidati early-stage — Robinhood Chain</h2>
+    <p class="hint">Score parziale: le componenti smart money, team proximity, holder growth,
+      deployer e GitHub <strong>non sono verificabili automaticamente</strong> e valgono N/D.
+      Il sistema non emette mai BUY ALERT in autonomia: classificazione massima
+      <span class="badge hpw">HIGH-PRIORITY WATCH</span>, che richiede verifica manuale completa
+      (contract, sellability, holder, cluster) prima di qualunque decisione.</p>
+    <div class="table-wrap">
+      <table id="cand-table">
+        <thead><tr>
+          <th>Classe</th><th>Token</th><th>Età</th><th>Liquidità</th><th>Vol 24h</th>
+          <th>V/L</th><th>Txns</th><th>Buy%</th><th>Δ24h</th><th>Score</th><th>Segnali</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="watchlist">
+    <h2>Watchlist handoff</h2>
+    <div id="watch-cards" class="watch-grid"></div>
+  </section>
+
+  <section id="deltas">
+    <h2>Variazioni dall'ultima scansione</h2>
+    <div id="delta-content" class="panel"></div>
+  </section>
+
+  <section id="global">
+    <h2>Radar globale — chain secondarie</h2>
+    <p class="hint">Nuovi pool nelle ultime ore che superano lo screening minimo
+      (liquidità, transazioni, assenza di red flag automatiche).</p>
+    <div id="global-content"></div>
+  </section>
+
+  <section id="method">
+    <h2>Metodologia e limiti</h2>
+    <div class="split">
+      <div class="panel">
+        <h3>Pesi dello score (handoff §7)</h3>
+        <table id="weights-table"></table>
+        <p class="hint">Copertura automatica attuale: solo Liquidity, Social (proxy debole)
+          e Bridge/Flow (proxy a livello chain) → max ~30/100. Un candidato non può
+          raggiungere la soglia BUY ALERT (85) senza analisi manuale.</p>
+      </div>
+      <div class="panel">
+        <h3>Classificazione delle informazioni</h3>
+        <ul class="legend">
+          <li><span class="tag fact">fatto</span> dato on-chain o da fonte primaria/aggregatore (TVL, liquidità, volumi, txns)</li>
+          <li><span class="tag est">stima</span> valore derivato (market cap, score liquidità, presenza social)</li>
+          <li><span class="tag inf">inferenza</span> conclusione analitica (classificazione, score parziale)</li>
+          <li><span class="tag nd">N/D</span> non verificabile da fonti pubbliche gratuite (smart money, holder, deployer, bundle/sniper, team proximity)</li>
+        </ul>
+        <h3>Cosa questo strumento NON fa</h3>
+        <ul class="legend">
+          <li>non verifica contract, honeypot, sellability, LP lock</li>
+          <li>non analizza holder, cluster di wallet, bundle o sniper</li>
+          <li>non monitora gli account X collegati a Robinhood</li>
+          <li>non esegue transazioni e non dà raccomandazioni d'acquisto</li>
+        </ul>
+      </div>
+    </div>
+    <div class="panel disclaimer">
+      ⚠️ <strong>Nessun segnale è una certezza.</strong> Questo dashboard è uno strumento di
+      discovery (Livello 1-2 del flusso decisionale): produce liste grezze e watchlist, mai
+      decisioni operative. Ogni candidato richiede l'analisi manuale completa prevista
+      dall'handoff (sicurezza contratto, holder, cluster, smart money, catalizzatori) prima di
+      considerare qualunque esposizione. Rischio di perdita totale sempre presente sui token
+      early-stage. La risposta corretta in assenza di convergenza è <strong>NO TRADE</strong>.
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>Fonti: DefiLlama · GeckoTerminal · DexScreener (API pubbliche gratuite) ·
+     Orario di riferimento: Europe/Zurich · Aggiornamento orario via GitHub Actions</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

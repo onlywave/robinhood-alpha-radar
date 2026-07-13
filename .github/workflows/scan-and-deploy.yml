@@ -1,0 +1,47 @@
+name: scan-and-deploy
+
+on:
+  schedule:
+    - cron: "17 * * * *"   # ogni ora al minuto 17 (evita i picchi di carico di GitHub)
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  scan-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Esegui scanner (fonti pubbliche, zero dipendenze)
+        run: |
+          mkdir -p _site/data
+          python scanner/scan.py --out _site/data
+
+      - name: Assembla sito statico
+        run: cp -r site/index.html site/app.js site/style.css _site/
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
