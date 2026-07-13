@@ -254,11 +254,97 @@ def enrich_dexscreener(cands, chain_id):
                             for s in info.get("socials", []) if s.get("url")]
 
 
+# ------------------------------------------------- enrichment on-chain (L2/L3)
+
+BURN_ADDRS = {"0x0000000000000000000000000000000000000000",
+              "0x000000000000000000000000000000000000dead"}
+
+
+def enrich_onchain(cands, prev_by_token):
+    """Arricchisce i top candidati con dati Blockscout/RPC: holder count e
+    crescita, concentrazione top-10 aggiustata (esclusi pool/burn/contratto),
+    verifica del contratto, owner()/renounce, deployer e sua quota.
+
+    Ogni dato mancante resta None (dichiarato N/D, mai inventato)."""
+    pc = CONFIG["primary_chain"]
+    explorer = pc["explorer"].rstrip("/")
+    rpc = pc["rpc"]
+    for c in cands[:CONFIG.get("onchain_enrich_top", 10)]:
+        ta = (c.get("token_address") or "").lower()
+        if not ta:
+            continue
+        oc = {"holders_count": None, "holders_growth_pct_1h": None,
+              "top10_adjusted_pct": None, "contract_verified": None,
+              "owner_status": None, "creator": None,
+              "creator_share_pct": None, "total_supply": None}
+        time.sleep(0.4)  # gentile con Blockscout
+
+        tk = http_json(f"{explorer}/api/v2/tokens/{ta}",
+                       headers=UA_BROWSER, retries=3)
+        if tk and isinstance(tk, dict):
+            oc["holders_count"] = int(fnum(tk.get("holders_count")
+                                           or tk.get("holders"), 0)) or None
+            oc["total_supply"] = fnum(tk.get("total_supply"), None)
+
+        info = http_json(f"{explorer}/api/v2/addresses/{ta}",
+                         headers=UA_BROWSER, retries=2)
+        if info and isinstance(info, dict):
+            oc["creator"] = info.get("creator_address_hash")
+
+        sc = http_json(f"{explorer}/api/v2/smart-contracts/{ta}",
+                       headers=UA_BROWSER, retries=2)
+        if sc and isinstance(sc, dict):
+            oc["contract_verified"] = bool(sc.get("is_verified")
+                                           or sc.get("source_code")
+                                           or sc.get("abi"))
+        elif sc is not None:
+            oc["contract_verified"] = False
+
+        # owner(): 0x0 = renounced; assente = nessuna funzione owner
+        ores = eth_call(ta, "0x8da5cb5b", rpc)
+        if ores is None:
+            oc["owner_status"] = None          # RPC non ha risposto
+        elif ores in ("0x", "0x0"):
+            oc["owner_status"] = "assente"     # il contratto non espone owner()
+        else:
+            owner = "0x" + ores[-40:]
+            oc["owner_status"] = ("renounced" if int(owner, 16) == 0
+                                  else f"attivo:{owner}")
+
+        holders = http_json(f"{explorer}/api/v2/tokens/{ta}/holders",
+                            headers=UA_BROWSER, retries=3)
+        if holders and isinstance(holders, dict) and oc["total_supply"]:
+            pool = (c.get("pool_address") or "").lower()
+            creator = (oc["creator"] or "").lower()
+            shares = []
+            for it in holders.get("items", []):
+                a = it.get("address") or {}
+                h = (a.get("hash") or "").lower()
+                name = (a.get("name") or "")
+                if h in BURN_ADDRS or h == ta or h == pool:
+                    continue
+                if a.get("is_contract") and "pool" in name.lower():
+                    continue
+                share = 100 * fnum(it.get("value")) / oc["total_supply"]
+                if h == creator:
+                    oc["creator_share_pct"] = round(share, 2)
+                shares.append(share)
+            if shares:
+                oc["top10_adjusted_pct"] = round(sum(shares[:10]), 1)
+
+        prev_oc = (prev_by_token.get(ta) or {}).get("onchain") or {}
+        prev_h = prev_oc.get("holders_count")
+        if oc["holders_count"] and prev_h:
+            oc["holders_growth_pct_1h"] = round(
+                100 * (oc["holders_count"] - prev_h) / prev_h, 2)
+        c["onchain"] = oc
+
+
 # ------------------------------------------------------- screening & scoring
 
 def screen_and_score(c, scr, weights, bridge_flow_score):
     """Applica filtri handoff §9 e score parziale §7. Ritorna il candidato arricchito."""
-    flags, notes = [], []
+    flags, cautions, notes = [], [], []
     liq = c["liquidity_usd"]
     vol = c["vol_h24"]
     tx24 = c["buys_h24"] + c["sells_h24"]
@@ -305,11 +391,60 @@ def screen_and_score(c, scr, weights, bridge_flow_score):
     n_soc = len(c.get("socials", [])) + len(c.get("websites", []))
     social_score = min(100, n_soc * 30) if n_soc else None  # None = N/D
 
+    # --- proxy on-chain (solo candidati arricchiti; altrimenti N/D)
+    oc = c.get("onchain") or {}
+    smart_money = holder_growth = deployer = None
+
+    if oc.get("holders_count") is not None and oc.get("top10_adjusted_pct") is not None:
+        # proxy "qualità della distribuzione/accumulo" (stima, non wallet-level)
+        top10 = oc["top10_adjusted_pct"]
+        s = 50
+        if top10 <= 15:
+            s += 25
+        elif top10 <= 25:
+            s += 15
+        elif top10 > 50:
+            s -= 35
+        elif top10 > 35:
+            s -= 15
+        g = oc.get("holders_growth_pct_1h")
+        if g is not None:
+            s += 15 if g > 1 else (5 if g > 0 else -15)
+        if 0.45 <= buy_ratio <= 0.70 and c["sells_h24"] >= 30:
+            s += 10  # flusso bilanciato con vendite reali = mercato sano
+        smart_money = max(0, min(100, s))
+
+    if oc.get("holders_count") is not None:
+        h = oc["holders_count"]
+        holder_growth = 20 if h < 100 else 40 if h < 300 else \
+            60 if h < 1000 else 75 if h < 3000 else 85
+        g = oc.get("holders_growth_pct_1h")
+        if g is not None:
+            holder_growth = max(0, min(100, holder_growth
+                                       + (15 if g > 1 else 5 if g > 0 else -20)))
+
+    if oc.get("creator") is not None or oc.get("owner_status") is not None:
+        deployer = 50
+        cs = oc.get("creator_share_pct")
+        if cs is not None:
+            deployer += 20 if cs < 2 else (10 if cs < 5 else
+                                           (-30 if cs > 20 else 0))
+        ost = oc.get("owner_status")
+        if ost in ("renounced", "assente"):
+            deployer += 20
+        elif ost and ost.startswith("attivo"):
+            deployer -= 10
+            cautions.append("owner attivo sul contratto (privilegi amministrativi "
+                            "possibili — verificare)")
+        if oc.get("contract_verified") is False:
+            deployer -= 25
+        deployer = max(0, min(100, deployer))
+
     components = {
-        "smart_money": None, "team_proximity": None, "holder_growth": None,
-        "deployer": None, "github_dev": None,
-        "liquidity": liq_score, "social_velocity": social_score,
-        "bridge_flow": bridge_flow_score,
+        "smart_money": smart_money, "team_proximity": None,
+        "holder_growth": holder_growth, "deployer": deployer,
+        "github_dev": None, "liquidity": liq_score,
+        "social_velocity": social_score, "bridge_flow": bridge_flow_score,
     }
     score, coverage = 0.0, 0.0
     for k, w in weights.items():
@@ -317,27 +452,68 @@ def screen_and_score(c, scr, weights, bridge_flow_score):
         if v is not None:
             score += w * v / 100.0
             coverage += w
-    c["score_partial"] = round(score, 1)
+    norm = round(100 * score / coverage, 1) if coverage else 0.0
+    c["score_partial"] = round(score, 1)       # assoluto (compat storico)
+    c["score_norm"] = norm                     # rinormalizzato sulla copertura
     c["score_coverage_pct"] = coverage
     c["score_components"] = components
     c["vol_liq_ratio"] = round(vol_liq, 2)
     c["buy_ratio"] = round(buy_ratio, 3)
-    c["red_flags"] = flags
     c["ultra_early"] = ultra_early
 
-    # --- classificazione (mai BUY ALERT automatico)
+    # --- gate BUY ALERT: ogni requisito mancante viene elencato, mai taciuto
+    ba = CONFIG["buy_alert"]
+    missing = []
+    if norm < ba["min_norm_score"]:
+        missing.append(f"score {norm} < {ba['min_norm_score']}")
+    if coverage < ba["min_coverage_pct"]:
+        missing.append(f"copertura dati {coverage}% < {ba['min_coverage_pct']}%")
+    if liq < ba["min_liquidity_usd"]:
+        missing.append(f"liquidità ${liq:,.0f} < ${ba['min_liquidity_usd']:,}")
+    if oc.get("contract_verified") is not True:
+        missing.append("contratto non verificato (o verifica non disponibile)")
+    if oc.get("owner_status") not in ("renounced", "assente"):
+        missing.append("owner non rinunciato")
+    t10 = oc.get("top10_adjusted_pct")
+    if t10 is None or t10 > ba["max_top10_adjusted_pct"]:
+        missing.append(f"top-10 aggiustata {t10}% oltre "
+                       f"{ba['max_top10_adjusted_pct']}% (o N/D)")
+    hc = oc.get("holders_count")
+    if hc is None or hc < ba["min_holders"]:
+        missing.append(f"holders {hc} < {ba['min_holders']} (o N/D)")
+    if c["sells_h24"] < ba["min_sells_h24"]:
+        missing.append(f"vendite reali 24h {c['sells_h24']} < "
+                       f"{ba['min_sells_h24']} (sellability empirica)")
+    if buy_ratio > ba["max_buy_ratio"]:
+        missing.append(f"buy ratio {buy_ratio:.0%} troppo unidirezionale")
+    if age_h is None or age_h < ba["min_age_hours"]:
+        missing.append(f"età < {ba['min_age_hours']}h: dati insufficienti")
+    if age_h is not None and age_h > ba["max_age_days"] * 24:
+        missing.append(f"età > {ba['max_age_days']}g: non più early")
+    if c.get("chg_h24") is not None and c["chg_h24"] < ba["max_chg24_drop_pct"]:
+        missing.append(f"crollo in corso ({c['chg_h24']:.0f}%/24h)")
+    if flags:
+        missing.append("red flag presenti")
+    c["buy_missing"] = missing
+    c["red_flags"] = flags
+    c["cautions"] = cautions
+
     material = [f for f in flags if "wash" in f or "pump" in f]
     if material:
         c["classification"] = "AVOID"
-    elif (early and liq >= scr["watch_liquidity_usd"] and tx24 >= scr["hpw_txns_h24"]
-          and not flags and n_soc >= 2):
+    elif not missing:
+        c["classification"] = "ALPHA BUY ALERT"
+    elif (norm >= 70 and coverage >= 40 and not flags
+          and early and liq >= scr["watch_liquidity_usd"]
+          and tx24 >= scr["hpw_txns_h24"]):
         c["classification"] = "HIGH-PRIORITY WATCH"
     elif early or liq >= scr["watch_liquidity_usd"]:
         c["classification"] = "WATCHLIST"
     else:
         c["classification"] = "DISCOVERY"
-    notes.append("Score parziale: smart money, team proximity, holder, deployer e "
-                 "GitHub non sono verificabili automaticamente da fonti gratuite (N/D).")
+    notes.append("Team proximity e GitHub restano N/D (esclusi dalla "
+                 "rinormalizzazione); smart money = proxy di distribuzione, "
+                 "non analisi wallet-level.")
     c["notes"] = notes
     return c
 
@@ -708,21 +884,29 @@ def main():
     raw = [normalize_pool(p, inc, "robinhood") for p in pools + tpools]
     cands = dedupe_best_pool(raw)
 
-    print("[3/6] Arricchimento DexScreener…")
+    print("[3/6] Arricchimento DexScreener + on-chain (Blockscout/RPC)…")
     cands_pass = [c for c in cands
                   if c["liquidity_usd"] >= scr["min_liquidity_usd"]
                   and c["buys_h24"] + c["sells_h24"] >= scr["min_txns_h24"]]
     cands_pass.sort(key=lambda c: c["liquidity_usd"], reverse=True)
     enrich_dexscreener(cands_pass, CONFIG["primary_chain"]["dexscreener_id"])
 
+    previous, history = load_previous(out_dir)
+    prev_by_token = {(p.get("token_address") or "").lower(): p
+                     for p in (previous or {}).get("candidates", [])}
+    enrich_onchain(cands_pass, prev_by_token)
+
     screened = []
     for c in cands_pass:
         s = screen_and_score(c, scr, weights, bridge_flow)
         if s:
             screened.append(s)
-    order = {"HIGH-PRIORITY WATCH": 0, "WATCHLIST": 1, "DISCOVERY": 2, "AVOID": 3}
-    screened.sort(key=lambda c: (order.get(c["classification"], 9), -c["score_partial"]))
+    order = {"ALPHA BUY ALERT": -1, "HIGH-PRIORITY WATCH": 0, "WATCHLIST": 1,
+             "DISCOVERY": 2, "AVOID": 3}
+    screened.sort(key=lambda c: (order.get(c["classification"], 9),
+                                 -c.get("score_norm", 0)))
     screened = screened[:CONFIG["max_candidates_shown"]]
+    buys = [c for c in screened if c["classification"] == "ALPHA BUY ALERT"]
 
     print("[4/7] Watchlist handoff (DexScreener)…")
     watchlist = fetch_watchlist()
@@ -747,7 +931,6 @@ def main():
                              "candidates": kept[:5]})
 
     print("[7/7] Delta e storico…")
-    previous, history = load_previous(out_dir)
     deltas = compute_deltas(screened, previous)
 
     history.append({
@@ -756,24 +939,37 @@ def main():
         "dex_vol_24h": status["dex_vol_24h"],
         "n_candidates": len(screened),
         "n_hpw": sum(1 for c in screened if c["classification"] == "HIGH-PRIORITY WATCH"),
+        "n_buy": len(buys),
+        "buy_symbols": [c["token_symbol"] for c in buys],
         "wallet_value": wallets[0]["total_value_usd"] if wallets else None,
     })
     history = history[-CONFIG["history_max_points"]:]
 
     n_hpw = sum(1 for c in screened if c["classification"] == "HIGH-PRIORITY WATCH")
+    if buys:
+        op_state = "ALPHA BUY ALERT"
+        op_note = (f"{len(buys)} candidato/i superano tutti i gate automatici "
+                   f"({', '.join(c['token_symbol'] or '?' for c in buys)}). "
+                   "Segnale automatico, NON consulenza: eseguire lo script di "
+                   "verifica finale (scripts/verifica_finale.py) prima di "
+                   "qualunque decisione. Rischio di perdita totale presente.")
+    else:
+        op_state = "NO TRADE"
+        op_note = (
+            "Nessun candidato supera tutti i gate BUY automatici (score "
+            "rinormalizzato ≥85, copertura ≥60%, contratto verificato, owner "
+            "rinunciato, concentrazione e sellability nei limiti). Per ogni "
+            "candidato la colonna Segnali elenca cosa manca.")
     latest = {
         "generated_at_utc": now.isoformat(),
         "generated_at_local": datetime.now(TZ).strftime("%d/%m/%Y %H:%M %Z"),
-        "operational_state": "NO TRADE",
-        "operational_note": (
-            "Nessun candidato supera automaticamente la soglia BUY ALERT (85/100). "
-            "Lo score automatico copre solo una parte dei segnali richiesti: "
-            "smart money, team proximity, holder growth, deployer e sviluppo "
-            "richiedono verifica manuale prima di qualunque decisione."),
+        "operational_state": op_state,
+        "operational_note": op_note,
         "chain_status": status,
         "bridge_flow_score": bridge_flow,
         "candidates": screened,
         "n_hpw": n_hpw,
+        "n_buy": len(buys),
         "watchlist": watchlist,
         "wallets": wallets,
         "global_radar": global_radar,

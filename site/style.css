@@ -66,6 +66,17 @@ tr:last-child td { border-bottom: none; }
 .badge.disc { background: #14202e; color: var(--blue); border: 1px solid var(--blue); }
 .badge.avoid { background: #3a1d1a; color: var(--red); border: 1px solid var(--red); }
 .badge.eco { background: #241a2e; color: var(--purple); border: 1px solid var(--purple); }
+.badge.buy {
+  background: #0d3a22; color: #4ef09a; border: 1px solid #4ef09a;
+  box-shadow: 0 0 8px rgba(51, 209, 122, .45); animation: buypulse 1.6s infinite;
+}
+@keyframes buypulse { 50% { box-shadow: 0 0 16px rgba(51, 209, 122, .8); } }
+.buy-panel { border-color: var(--accent); }
+.buy-panel h3 { color: var(--accent); text-transform: none; font-size: 17px; }
+.mono-sm { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11.5px; word-break: break-all; }
+.caution { color: var(--amber); font-size: 12px; display: block; }
+.oc-cell { min-width: 130px; }
+.oc-line { display: block; font-size: 11.5px; color: var(--muted); white-space: nowrap; }
 .tag {
   display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 10.5px;
   font-weight: 700; text-transform: uppercase; letter-spacing: .5px; vertical-align: middle;

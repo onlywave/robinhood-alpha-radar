@@ -38,6 +38,11 @@
     </div>
   </section>
 
+  <section id="buy-section">
+    <h2>🚨 ALPHA BUY ALERT</h2>
+    <div id="buy-content"></div>
+  </section>
+
   <section id="portfolio">
     <h2>Portafoglio — wallet monitorato</h2>
     <div id="wallet-content"></div>
@@ -45,16 +50,19 @@
 
   <section id="candidates">
     <h2>Candidati early-stage — Robinhood Chain</h2>
-    <p class="hint">Score parziale: le componenti smart money, team proximity, holder growth,
-      deployer e GitHub <strong>non sono verificabili automaticamente</strong> e valgono N/D.
-      Il sistema non emette mai BUY ALERT in autonomia: classificazione massima
-      <span class="badge hpw">HIGH-PRIORITY WATCH</span>, che richiede verifica manuale completa
-      (contract, sellability, holder, cluster) prima di qualunque decisione.</p>
+    <p class="hint">Score <strong>rinormalizzato sulla copertura dati reale</strong>: liquidità,
+      distribuzione holder, crescita holder, deployer/owner e verifica contratto sono letti
+      on-chain (Blockscout + RPC); smart money è un <em>proxy di distribuzione</em>, non analisi
+      wallet-level; team proximity e GitHub restano N/D. Un candidato diventa
+      <span class="badge buy">ALPHA BUY ALERT</span> solo superando <strong>tutti</strong> i gate
+      (score ≥85, copertura ≥60%, contratto verificato, owner rinunciato, top-10 ≤30%,
+      sellability empirica). Il segnale resta automatico e fallibile: prima di agire va eseguita
+      la verifica finale.</p>
     <div class="table-wrap">
       <table id="cand-table">
         <thead><tr>
           <th>Classe</th><th>Token</th><th>Età</th><th>Liquidità</th><th>Vol 24h</th>
-          <th>V/L</th><th>Txns</th><th>Buy%</th><th>Δ24h</th><th>Score</th><th>Segnali</th>
+          <th>V/L</th><th>Txns</th><th>Buy%</th><th>Δ24h</th><th>On-chain</th><th>Score</th><th>Segnali</th>
         </tr></thead>
         <tbody></tbody>
       </table>
@@ -91,17 +99,24 @@
       <div class="panel">
         <h3>Classificazione delle informazioni</h3>
         <ul class="legend">
-          <li><span class="tag fact">fatto</span> dato on-chain o da fonte primaria/aggregatore (TVL, liquidità, volumi, txns)</li>
-          <li><span class="tag est">stima</span> valore derivato (market cap, score liquidità, presenza social)</li>
-          <li><span class="tag inf">inferenza</span> conclusione analitica (classificazione, score parziale)</li>
-          <li><span class="tag nd">N/D</span> non verificabile da fonti pubbliche gratuite (smart money, holder, deployer, bundle/sniper, team proximity)</li>
+          <li><span class="tag fact">fatto</span> dato on-chain o da fonte primaria (TVL, liquidità, volumi, txns, holder, owner, contratto verificato)</li>
+          <li><span class="tag est">stima</span> valore derivato o proxy (market cap, score liquidità, smart-money proxy, presenza social)</li>
+          <li><span class="tag inf">inferenza</span> conclusione analitica (classificazione, score, BUY ALERT)</li>
+          <li><span class="tag nd">N/D</span> non verificabile da fonti pubbliche gratuite (team proximity, GitHub, cluster wallet-level, bundle/sniper)</li>
         </ul>
-        <h3>Cosa questo strumento NON fa</h3>
+        <h3>Cosa verifica automaticamente</h3>
         <ul class="legend">
-          <li>non verifica contract, honeypot, sellability, LP lock</li>
-          <li>non analizza holder, cluster di wallet, bundle o sniper</li>
-          <li>non monitora gli account X collegati a Robinhood</li>
-          <li>non esegue transazioni e non dà raccomandazioni d'acquisto</li>
+          <li>contratto verificato, owner()/renounce, deployer e sua quota (Blockscout + RPC)</li>
+          <li>holder count, crescita holder, concentrazione top-10 aggiustata (esclusi pool/burn)</li>
+          <li>sellability empirica: vendite reali osservate on-chain nelle 24h</li>
+          <li>GoPlus security quando la chain sarà supportata (oggi N/D su 4663)</li>
+        </ul>
+        <h3>Cosa resta manuale</h3>
+        <ul class="legend">
+          <li>LP lock/burn, honeypot simulato, cluster di wallet, bundle/sniper forensics</li>
+          <li>account X collegati a Robinhood, catalizzatori, qualità del team</li>
+          <li>l'ultima parola: eseguire <code>python3 scripts/verifica_finale.py &lt;token&gt;</code> prima di ogni decisione</li>
+          <li>il sistema non esegue transazioni; ogni BUY ALERT è un segnale automatico fallibile, non una raccomandazione</li>
         </ul>
       </div>
     </div>

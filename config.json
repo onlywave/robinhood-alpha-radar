@@ -52,6 +52,20 @@
     "github_dev": 5,
     "bridge_flow": 5
   },
+  "buy_alert": {
+    "min_norm_score": 85,
+    "min_coverage_pct": 60,
+    "min_liquidity_usd": 150000,
+    "max_top10_adjusted_pct": 30,
+    "min_holders": 300,
+    "min_sells_h24": 50,
+    "max_buy_ratio": 0.78,
+    "min_age_hours": 24,
+    "max_age_days": 30,
+    "max_chg24_drop_pct": -50
+  },
+  "onchain_enrich_top": 10,
+  "min_position_value_usd": 10,
   "max_candidates_shown": 25,
   "history_max_points": 1000
 }

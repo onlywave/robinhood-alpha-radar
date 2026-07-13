@@ -23,22 +23,41 @@ nessuna API key: solo fonti pubbliche gratuite.
 - **Delta tra scansioni**: entrati / usciti / riclassificati
 - **Radar globale**: nuovi pool oltre screening sulle chain secondarie
 
-## Cosa NON fa (per design)
+## BUY ALERT automatici (v2) e loro limiti
 
-Il sistema **non emette mai BUY ALERT in autonomia**. Le componenti di score che
-richiedono verifica manuale o fonti a pagamento valgono N/D e sono dichiarate:
-smart money, team proximity, holder growth, deployer history, bundle/sniper,
-GitHub activity. La classificazione massima automatica è **HIGH-PRIORITY WATCH**.
+Lo score è **rinormalizzato sulla copertura dati reale**. Componenti lette
+on-chain (Blockscout + RPC ufficiale): verifica contratto, owner()/renounce,
+deployer e sua quota, holder count e crescita, concentrazione top-10 aggiustata
+(esclusi pool/burn/contratto), sellability empirica (vendite reali osservate).
+Smart money = proxy di qualità della distribuzione (non analisi wallet-level);
+team proximity e GitHub restano N/D ed esclusi dalla rinormalizzazione
+(copertura massima ~80%).
 
-Non verifica contract/honeypot/sellability/LP-lock, non analizza wallet,
-non esegue transazioni, non dà raccomandazioni. Stato operativo di default:
-**NO TRADE**. Nessun segnale è una certezza.
+Un candidato diventa **ALPHA BUY ALERT** solo superando TUTTI i gate:
+score ≥85, copertura ≥60%, liquidità ≥$150k, contratto verificato, owner
+rinunciato/assente, top-10 aggiustata ≤30%, ≥300 holder, ≥50 vendite reali/24h,
+flusso non unidirezionale, età 24h–30g, nessuna red flag. Per ogni candidato
+sotto soglia il campo `buy_missing` elenca esattamente cosa manca.
+
+**Un BUY ALERT è un segnale automatico fallibile, non una raccomandazione.**
+Prima di qualunque decisione va eseguita la verifica finale:
+
+```bash
+python3 scripts/verifica_finale.py 0xTOKEN
+```
+
+che controlla slippage stimato, proxy/upgradeability, distribuzione holder con
+etichette, quota deployer, venditori distinti on-chain (~24h) e GoPlus (quando
+la chain sarà supportata). Restano manuali: LP lock/burn, bundle/sniper
+forensics, cluster di wallet, team, catalizzatori. Il sistema non esegue
+transazioni. Rischio di perdita totale sempre presente.
 
 ## Classificazioni
 
 | Livello | Significato |
 |---|---|
-| `HIGH-PRIORITY WATCH` | metriche disponibili eccellenti, trigger mancanti da verificare a mano |
+| `ALPHA BUY ALERT` | tutti i gate automatici superati — richiede comunque verifica finale manuale |
+| `HIGH-PRIORITY WATCH` | score ≥70 e metriche forti, uno o più gate BUY mancanti |
 | `WATCHLIST` | oltre screening, dati insufficienti o rischio elevato |
 | `DISCOVERY` | oltre soglie minime, solo lista grezza |
 | `AVOID` | red flag automatica materiale (wash-like, pump su liquidità esigua) |

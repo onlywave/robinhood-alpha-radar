@@ -21,6 +21,7 @@ const esc = (s) => String(s ?? "").replace(/[&<>"']/g,
   (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
 const CLASS_BADGE = {
+  "ALPHA BUY ALERT": ["buy", "🚨 ALPHA BUY ALERT"],
   "HIGH-PRIORITY WATCH": ["hpw", "HIGH-PRIORITY WATCH"],
   "WATCHLIST": ["watch", "WATCHLIST"],
   "WATCHLIST / BENCHMARK": ["watch", "WATCHLIST / BENCHMARK"],
@@ -76,7 +77,53 @@ function renderStatus(d) {
     || `<tr><td class="empty">dato non disponibile</td></tr>`;
 }
 
+const MIN_POSITION_USD = 10;
 const CAP_KEY = "alpha_radar_capitale_disponibile_usd";
+
+function renderBuyAlerts(d) {
+  const el = document.getElementById("buy-content");
+  const buys = (d.candidates || []).filter((c) => c.classification === "ALPHA BUY ALERT");
+  if (!buys.length) {
+    el.innerHTML = `<div class="panel"><span class="empty">Nessun BUY ALERT attivo in questa
+      scansione — stato <strong>NO TRADE</strong>. I gate richiesti (score ≥85, copertura ≥60%,
+      contratto verificato, owner rinunciato, top-10 ≤30%, sellability empirica) non sono tutti
+      soddisfatti da alcun candidato: il dettaglio di cosa manca è nella tabella candidati.</span></div>`;
+    return;
+  }
+  el.innerHTML = buys.map((c) => {
+    const oc = c.onchain || {};
+    const link = c.ds_url || `https://www.geckoterminal.com/robinhood/pools/${c.pool_address}`;
+    return `<div class="panel buy-panel">
+      <h3>🚨 ${esc(c.token_symbol)} <span class="name">${esc(c.token_name || "")}</span>
+        — score ${c.score_norm}/100 (copertura ${c.score_coverage_pct}%)</h3>
+      <div class="cards">
+        <div class="card"><div class="k">Contract <span class="tag fact">verificato</span></div>
+          <div class="d mono-sm">${esc(c.token_address)}</div></div>
+        <div class="card"><div class="k">Mercato</div>
+          <div class="d">liq ${fmtUSD(c.liquidity_usd)} · vol24 ${fmtUSD(c.vol_h24)} ·
+          ${fmtN(c.buys_h24 + c.sells_h24)} txns · buy ${(c.buy_ratio * 100).toFixed(0)}% ·
+          età ${fmtAge(c.age_hours)}</div></div>
+        <div class="card"><div class="k">Distribuzione</div>
+          <div class="d">${fmtN(oc.holders_count)} holder
+          ${oc.holders_growth_pct_1h !== null && oc.holders_growth_pct_1h !== undefined ? `(${fmtPct(oc.holders_growth_pct_1h, 2)}/h)` : ""} ·
+          top-10 adj ${oc.top10_adjusted_pct ?? "N/D"}% ·
+          deployer ${oc.creator_share_pct !== null && oc.creator_share_pct !== undefined ? oc.creator_share_pct + "%" : "fuori top-50 (<1%)"}</div></div>
+        <div class="card"><div class="k">Sicurezza</div>
+          <div class="d">owner: ${esc(oc.owner_status || "N/D")} ·
+          contratto ${oc.contract_verified ? "verificato ✓" : "NON verificato"} ·
+          ${c.sells_h24} vendite reali/24h</div></div>
+      </div>
+      ${(c.cautions || []).map((x) => `<div class="warn-box">⚠ ${esc(x)}</div>`).join("")}
+      <div class="warn-box">🔬 <strong>Verifica finale obbligatoria prima di agire:</strong>
+        <code>python3 scripts/verifica_finale.py ${esc(c.token_address)}</code> —
+        controlla slippage, proxy, distribuzione, venditori distinti on-chain e GoPlus.
+        Restano manuali: LP lock, bundle/sniper, team. Segnale automatico fallibile,
+        non consulenza; rischio di perdita totale presente. Size prudenziale e
+        invalidazione definita PRIMA dell'ingresso.</div>
+      <a href="${esc(link)}" target="_blank" rel="noopener">grafico e pool ↗</a>
+    </div>`;
+  }).join("");
+}
 
 function getCapital() {
   const v = parseFloat(localStorage.getItem(CAP_KEY));
@@ -93,15 +140,16 @@ function renderWallets(d) {
     const cap = getCapital();
     const total = w.total_value_usd;
     const power = (total !== null && cap !== null) ? total + cap : null;
+    const shown = w.positions.filter((p) => p.value_usd !== null && p.value_usd >= MIN_POSITION_USD);
+    const hidden = w.positions.length - shown.length;
     const nativeRow = (w.native_eth !== null && w.native_eth > 0)
       ? `<tr><td class="tok">ETH <span class="name">nativo</span></td>
            <td class="num">${w.native_eth.toFixed(6)}</td>
            <td class="num">${fmtUSD(w.eth_price_usd)}</td>
            <td class="num">${fmtUSD(w.native_eth * (w.eth_price_usd || 0))}</td>
            <td></td><td><span class="tag fact">fatto</span></td></tr>` : "";
-    const posRows = w.positions.map((p) => {
-      const dust = p.value_usd !== null && p.value_usd < 1;
-      return `<tr class="${dust ? "dust" : ""}">
+    const posRows = shown.map((p) => {
+      return `<tr>
         <td class="tok"><a href="${esc(p.explorer_url)}" target="_blank" rel="noopener">${esc(p.symbol)}</a>
           <span class="name">${esc(p.name || "")}</span></td>
         <td class="num">${new Intl.NumberFormat("it-CH", { maximumFractionDigits: 4 }).format(p.qty)}</td>
@@ -131,7 +179,7 @@ function renderWallets(d) {
       <div class="cards">
         <div class="card"><div class="k">Valore posizioni on-chain <span class="tag est">stima</span></div>
           <div class="v">${total !== null ? fmtUSD(total, false) : "N/D"}</div>
-          <div class="d">${w.positions.length} posizioni${w.unpriced_positions ? ` · ${w.unpriced_positions} senza prezzo` : ""}</div></div>
+          <div class="d">${shown.length} posizioni rilevanti${hidden ? ` · ${hidden} sotto $${MIN_POSITION_USD} o senza prezzo (non mostrate)` : ""}</div></div>
         <div class="card capital-card"><div class="k">Capitale pronto da investire</div>
           <div class="v"><input id="cap-input-${wi}" type="number" min="0" step="100"
             placeholder="es. 10000" value="${cap !== null ? cap : ""}"> USD</div>
@@ -144,7 +192,7 @@ function renderWallets(d) {
       <h3 style="margin-top:16px">Posizioni attuali <span class="tag fact">saldi on-chain</span></h3>
       <div class="table-wrap"><table>
         <thead><tr><th>Asset</th><th>Quantità</th><th>Prezzo</th><th>Valore</th><th>Allocazione</th><th>Fonte prezzo</th></tr></thead>
-        <tbody>${nativeRow}${posRows || '<tr><td colspan="6" class="empty">nessuna posizione</td></tr>'}</tbody>
+        <tbody>${nativeRow}${posRows || `<tr><td colspan="6" class="empty">nessuna posizione sopra $${MIN_POSITION_USD}</td></tr>`}</tbody>
       </table></div>
       <h3 style="margin-top:16px">Operazioni recenti <span class="tag fact">eventi Transfer on-chain</span></h3>
       <div class="table-wrap"><table>
@@ -177,7 +225,18 @@ function renderCandidates(d) {
     const socials = (c.socials || []).map((s) =>
       `<a href="${esc(s.url)}" target="_blank" rel="noopener">${s.type === "twitter" ? "𝕏" : esc(s.type)}</a>`).join("")
       + (c.websites || []).slice(0, 1).map((w) => `<a href="${esc(w)}" target="_blank" rel="noopener">🌐</a>`).join("");
-    const flags = (c.red_flags || []).map((f) => `<span class="flag" title="${esc(f)}">⚠ ${esc(f)}</span>`).join("");
+    const flags = (c.red_flags || []).map((f) => `<span class="flag" title="${esc(f)}">⚠ ${esc(f)}</span>`).join("")
+      + (c.cautions || []).map((f) => `<span class="caution" title="${esc(f)}">△ ${esc(f.split(" (")[0])}</span>`).join("");
+    const missing = (c.buy_missing || []);
+    const missingHtml = c.classification !== "ALPHA BUY ALERT" && missing.length
+      ? `<span class="cov" title="${esc(missing.join("\n"))}">manca per BUY: ${missing.length} req.</span>` : "";
+    const oc = c.onchain || {};
+    const onchain = c.onchain
+      ? `<span class="oc-line">${fmtN(oc.holders_count)} hold${oc.holders_growth_pct_1h !== null && oc.holders_growth_pct_1h !== undefined ? ` <span class="${oc.holders_growth_pct_1h >= 0 ? "up" : "down"}">${fmtPct(oc.holders_growth_pct_1h, 1)}/h</span>` : ""}</span>
+         <span class="oc-line">top10 ${oc.top10_adjusted_pct ?? "N/D"}%</span>
+         <span class="oc-line">${oc.contract_verified === true ? "✓ verif." : oc.contract_verified === false ? "✗ non verif." : "verif. N/D"} · ${oc.owner_status ? (oc.owner_status.startsWith("attivo") ? "owner attivo" : "owner " + esc(oc.owner_status)) : "owner N/D"}</span>`
+      : `<span class="cov">non arricchito</span>`;
+    const score = c.score_norm ?? c.score_partial;
     const chg = c.chg_h24;
     return `<tr>
       <td>${badge(c.classification)}${c.ultra_early ? ' <span class="tag est" title="età < 72h">ultra-early</span>' : ""}</td>
@@ -190,10 +249,11 @@ function renderCandidates(d) {
       <td class="num">${fmtN(c.buys_h24 + c.sells_h24)}</td>
       <td class="num">${(c.buy_ratio * 100).toFixed(0)}%</td>
       <td class="num ${chg > 0 ? "up" : chg < 0 ? "down" : ""}">${fmtPct(chg)}</td>
-      <td><div class="score-bar"><div class="bar"><div class="fill" style="width:${Math.min(100, c.score_partial)}%"></div></div>
-        <span>${c.score_partial}</span></div>
+      <td class="oc-cell">${onchain}</td>
+      <td><div class="score-bar"><div class="bar"><div class="fill" style="width:${Math.min(100, score)}%"></div></div>
+        <span>${score}</span></div>
         <span class="cov">copertura ${c.score_coverage_pct}%</span></td>
-      <td>${flags}<span class="socials">${socials}</span></td>
+      <td>${flags}${missingHtml}<span class="socials">${socials}</span></td>
     </tr>`;
   }).join("");
 }
@@ -267,14 +327,19 @@ function renderGlobal(d) {
 
 function renderWeights() {
   const weights = [
-    ["Smart Money", 25, "nd"], ["Team Proximity", 20, "nd"], ["Liquidity", 15, "est"],
-    ["Holder Growth", 10, "nd"], ["Deployer", 10, "nd"], ["Social Velocity", 10, "est"],
-    ["GitHub / Developer", 5, "nd"], ["Bridge / Flow", 5, "est"],
+    ["Smart Money", 25, "est", "proxy distribuzione"],
+    ["Team Proximity", 20, "nd", "N/D — manuale"],
+    ["Liquidity", 15, "fact", "auto"],
+    ["Holder Growth", 10, "fact", "auto (Blockscout)"],
+    ["Deployer", 10, "fact", "auto (parziale)"],
+    ["Social Velocity", 10, "est", "proxy debole"],
+    ["GitHub / Developer", 5, "nd", "N/D — manuale"],
+    ["Bridge / Flow", 5, "est", "proxy chain"],
   ];
   document.getElementById("weights-table").innerHTML =
     `<tr><th>Componente</th><th>Peso</th><th>Automazione</th></tr>` +
-    weights.map(([n, w, t]) =>
-      `<tr><td>${n}</td><td class="num">${w}%</td><td><span class="tag ${t}">${t === "nd" ? "N/D — manuale" : "parziale"}</span></td></tr>`).join("");
+    weights.map(([n, w, t, label]) =>
+      `<tr><td>${n}</td><td class="num">${w}%</td><td><span class="tag ${t}">${label}</span></td></tr>`).join("");
 }
 
 async function main() {
@@ -293,6 +358,7 @@ async function main() {
   document.getElementById("generated-at").textContent = `ultimo aggiornamento: ${d.generated_at_local}`;
 
   renderStatus(d);
+  renderBuyAlerts(d);
   renderWallets(d);
   renderCandidates(d);
   renderWatchlist(d);
