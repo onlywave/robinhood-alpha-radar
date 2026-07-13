@@ -15,6 +15,11 @@ nessuna API key: solo fonti pubbliche gratuite.
   volume/liquidità (anti-wash), coerenza liquidità/market-cap, flusso buy/sell
 - **Score parziale** con i pesi dell'handoff §7 e **copertura dati dichiarata**
 - **Watchlist handoff**: CASHCAT, 4663 (benchmark), LIT/Lighter, Arcus
+- **Portafoglio wallet monitorato**: posizioni on-chain con prezzi e allocazione,
+  operazioni ricostruite dagli eventi Transfer (supporta smart account EIP-7702),
+  campo "capitale pronto da investire" salvato solo nel browser (localStorage).
+  Fonte primaria Blockscout con fallback completo su RPC ufficiale
+  (`balanceOf`, `symbol()`, `eth_getLogs`)
 - **Delta tra scansioni**: entrati / usciti / riclassificati
 - **Radar globale**: nuovi pool oltre screening sulle chain secondarie
 

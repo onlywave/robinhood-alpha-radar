@@ -34,6 +34,10 @@ CONFIG = json.load(open(os.path.join(ROOT, "config.json")))
 
 UA = {"User-Agent": "alpha-radar/1.0 (static dashboard; hourly cron)",
       "Accept": "application/json"}
+# Blockscout (nginx) rifiuta gli User-Agent non-browser con 503
+UA_BROWSER = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                            "AppleWebKit/537.36 (KHTML, like Gecko) Safari/537.36",
+              "Accept": "application/json"}
 
 GT_LAST_CALL = [0.0]  # GeckoTerminal: max 30 req/min -> spaziare le chiamate
 
@@ -62,7 +66,7 @@ def _ssl_context():
 SSL_CTX = _ssl_context()
 
 
-def http_json(url, retries=2, timeout=25, gt=False):
+def http_json(url, retries=2, timeout=25, gt=False, headers=None):
     """GET JSON con retry. Ritorna None su fallimento (mai eccezioni)."""
     if gt:
         wait = 2.8 - (time.time() - GT_LAST_CALL[0])
@@ -71,7 +75,7 @@ def http_json(url, retries=2, timeout=25, gt=False):
         GT_LAST_CALL[0] = time.time()
     for attempt in range(retries + 1):
         try:
-            req = urllib.request.Request(url, headers=UA)
+            req = urllib.request.Request(url, headers=headers or UA)
             with urllib.request.urlopen(req, timeout=timeout, context=SSL_CTX) as r:
                 return json.loads(r.read().decode("utf-8"))
         except urllib.error.HTTPError as e:
@@ -338,6 +342,246 @@ def screen_and_score(c, scr, weights, bridge_flow_score):
     return c
 
 
+# ------------------------------------------------------------------- wallet
+
+TRANSFER_SIG = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
+
+
+def rpc_call(method, params, rpc_url, timeout=25):
+    """JSON-RPC POST. Ritorna result o None."""
+    body = json.dumps({"jsonrpc": "2.0", "id": 1,
+                       "method": method, "params": params}).encode()
+    for attempt in range(3):
+        try:
+            req = urllib.request.Request(
+                rpc_url, data=body,
+                headers={**UA, "Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=timeout, context=SSL_CTX) as r:
+                d = json.loads(r.read().decode())
+                if "error" in d:
+                    print(f"[warn] RPC {method}: {d['error']}", file=sys.stderr)
+                    return None
+                return d.get("result")
+        except Exception as e:
+            if attempt == 2:
+                print(f"[warn] RPC {method} fallita: {e}", file=sys.stderr)
+                return None
+            time.sleep(2)
+    return None
+
+
+def eth_call(to, data, rpc):
+    return rpc_call("eth_call", [{"to": to, "data": data}, "latest"], rpc)
+
+
+def decode_abi_string(hexres):
+    """Decodifica il risultato di symbol(): stringa ABI o bytes32."""
+    if not hexres or hexres == "0x":
+        return None
+    h = hexres[2:]
+    try:
+        if len(h) == 64:  # bytes32
+            return bytes.fromhex(h).rstrip(b"\x00").decode("utf-8", "replace") or None
+        length = int(h[64:128], 16)
+        return bytes.fromhex(h[128:128 + length * 2]).decode("utf-8", "replace")
+    except (ValueError, IndexError):
+        return None
+
+
+def rpc_token_meta(taddr, rpc):
+    """(symbol, decimals) via eth_call — fallback quando Blockscout è giù."""
+    sym = decode_abi_string(eth_call(taddr, "0x95d89b41", rpc)) or "?"
+    decres = eth_call(taddr, "0x313ce567", rpc)
+    try:
+        dec = int(decres, 16) if decres and decres != "0x" else 18
+    except ValueError:
+        dec = 18
+    return sym, dec
+
+
+def fetch_wallet(wcfg):
+    """Posizioni + operazioni del wallet.
+
+    Fonte primaria Blockscout (dà anche i prezzi); l'istanza della chain è
+    però instabile (500 intermittenti), quindi ogni pezzo ha un fallback
+    on-chain via RPC ufficiale: balanceOf per i saldi, symbol()/decimals()
+    per i metadati, eth_getBalance per il nativo.
+
+    Il wallet può essere uno smart account EIP-7702: le transazioni classiche
+    non partono dall'indirizzo, quindi le operazioni si ricostruiscono dagli
+    eventi Transfer ERC-20 (entrambe le direzioni).
+    """
+    pc = CONFIG["primary_chain"]
+    addr = wcfg["address"]
+    explorer = pc["explorer"].rstrip("/")
+    rpc = pc["rpc"]
+    out = {"address": addr, "label": wcfg.get("label", "Wallet"),
+           "explorer_url": f"{explorer}/address/{addr}",
+           "native_eth": None, "eth_price_usd": None,
+           "positions": [], "operations": [],
+           "total_value_usd": None, "unpriced_positions": 0,
+           "source_errors": []}
+
+    # --- operazioni PRIMA (servono anche come fallback per le posizioni):
+    #     eventi Transfer da/verso il wallet (fatto on-chain)
+    padded = "0x" + "0" * 24 + addr[2:].lower()
+    logs_in = rpc_call("eth_getLogs", [{"fromBlock": "0x0", "toBlock": "latest",
+                                        "topics": [TRANSFER_SIG, None, padded]}], rpc)
+    logs_out = rpc_call("eth_getLogs", [{"fromBlock": "0x0", "toBlock": "latest",
+                                         "topics": [TRANSFER_SIG, padded]}], rpc)
+    if logs_in is None and logs_out is None:
+        out["source_errors"].append("rpc:eth_getLogs")
+    all_logs = (logs_in or []) + (logs_out or [])
+    touched_tokens = {l["address"].lower() for l in all_logs}
+
+    # --- info indirizzo + saldo nativo (fatto)
+    info = http_json(f"{explorer}/api/v2/addresses/{addr}",
+                     headers=UA_BROWSER, retries=3)
+    if info and isinstance(info, dict):
+        out["native_eth"] = int(info.get("coin_balance") or 0) / 1e18
+        out["eth_price_usd"] = fnum(info.get("exchange_rate"), None)
+        out["is_smart_account"] = bool(info.get("is_contract"))
+        impl = info.get("implementations") or []
+        if impl:
+            out["account_type"] = impl[0].get("name")
+    else:
+        out["source_errors"].append("blockscout:addresses(fallback rpc)")
+        bal = rpc_call("eth_getBalance", [addr, "latest"], rpc)
+        if bal:
+            out["native_eth"] = int(bal, 16) / 1e18
+        eth_px = http_json("https://coins.llama.fi/prices/current/coingecko:ethereum")
+        out["eth_price_usd"] = fnum(((eth_px or {}).get("coins") or {})
+                                    .get("coingecko:ethereum", {}).get("price"), None)
+
+    # --- posizioni token (fatto; prezzo = stima)
+    balances = http_json(f"{explorer}/api/v2/addresses/{addr}/token-balances",
+                         headers=UA_BROWSER, retries=3)
+    token_meta = {}  # addr_lower -> (symbol, decimals)
+    positions = []
+    if isinstance(balances, list):
+        for t in balances:
+            tok = t.get("token") or {}
+            taddr = (tok.get("address_hash") or tok.get("address") or "").lower()
+            dec = int(tok.get("decimals") or 18)
+            qty = int(t.get("value") or 0) / 10 ** dec
+            token_meta[taddr] = (tok.get("symbol") or "?", dec)
+            positions.append({
+                "symbol": tok.get("symbol") or "?",
+                "name": tok.get("name"),
+                "token_address": taddr,
+                "qty": qty,
+                "price_usd": fnum(tok.get("exchange_rate"), None),
+                "price_source": "blockscout" if tok.get("exchange_rate") else None,
+                "explorer_url": f"{explorer}/token/{taddr}",
+            })
+    else:
+        # fallback on-chain: i token mai toccati dal wallet non possono avere
+        # saldo; balanceOf sui token visti negli eventi Transfer
+        out["source_errors"].append("blockscout:token-balances(fallback rpc)")
+        for taddr in sorted(touched_tokens):
+            balres = eth_call(taddr, "0x70a08231" + padded[2:], rpc)
+            try:
+                raw = int(balres, 16) if balres and balres != "0x" else 0
+            except ValueError:
+                raw = 0
+            if raw == 0:
+                continue
+            sym, dec = rpc_token_meta(taddr, rpc)
+            token_meta[taddr] = (sym, dec)
+            positions.append({
+                "symbol": sym, "name": None, "token_address": taddr,
+                "qty": raw / 10 ** dec, "price_usd": None, "price_source": None,
+                "explorer_url": f"{explorer}/token/{taddr}",
+            })
+
+    # --- prezzi mancanti via DexScreener (stima; segnala liquidità esigua)
+    missing = [p["token_address"] for p in positions if p["price_usd"] is None]
+    if missing:
+        d = http_json(f"https://api.dexscreener.com/tokens/v1/"
+                      f"{pc['dexscreener_id']}/{','.join(missing[:30])}")
+        best = {}
+        for pair in d or []:
+            ta = ((pair.get("baseToken") or {}).get("address") or "").lower()
+            liq = fnum((pair.get("liquidity") or {}).get("usd"))
+            if ta and (ta not in best or liq > best[ta][0]):
+                best[ta] = (liq, fnum(pair.get("priceUsd"), None))
+        for p in positions:
+            hit = best.get(p["token_address"])
+            if p["price_usd"] is None and hit and hit[1]:
+                p["price_usd"] = hit[1]
+                p["price_source"] = "dexscreener"
+                if hit[0] < CONFIG["screening"]["min_liquidity_usd"]:
+                    p["price_warning"] = ("prezzo indicativo: liquidità del pool "
+                                          f"esigua (${hit[0]:,.0f})")
+
+    for p in positions:
+        p["value_usd"] = (p["qty"] * p["price_usd"]
+                          if p["price_usd"] is not None else None)
+    priced = [p for p in positions if p["value_usd"] is not None]
+    total = sum(p["value_usd"] for p in priced)
+    if out["native_eth"] and out["eth_price_usd"]:
+        total += out["native_eth"] * out["eth_price_usd"]
+    out["total_value_usd"] = round(total, 2)
+    out["unpriced_positions"] = len(positions) - len(priced)
+    for p in priced:
+        p["alloc_pct"] = round(100 * p["value_usd"] / total, 1) if total else None
+    positions.sort(key=lambda p: -(p["value_usd"] or 0))
+    out["positions"] = positions
+
+    # --- operazioni: dagli eventi Transfer già recuperati
+    events = [(l, "IN") for l in logs_in or []] + [(l, "OUT") for l in logs_out or []]
+    events.sort(key=lambda e: int(e[0]["blockNumber"], 16), reverse=True)
+    events = events[:25]
+
+    # metadata token non in bilancio (usciti del tutto): Blockscout, poi RPC
+    for l, _ in events:
+        ta = l["address"].lower()
+        if ta not in token_meta:
+            tk = http_json(f"{explorer}/api/v2/tokens/{ta}", headers=UA_BROWSER)
+            if tk and isinstance(tk, dict) and tk.get("symbol"):
+                token_meta[ta] = (tk.get("symbol"),
+                                  int(tk.get("decimals") or 18))
+            else:
+                token_meta[ta] = rpc_token_meta(ta, rpc)
+
+    block_ts = {}  # cache: blocco -> timestamp
+    for l, _ in events:
+        bn = l["blockNumber"]
+        if bn not in block_ts:
+            blk = rpc_call("eth_getBlockByNumber", [bn, False], rpc)
+            block_ts[bn] = int(blk["timestamp"], 16) if blk else None
+
+    price_by_addr = {p["token_address"]: p["price_usd"] for p in positions}
+    for l, direction in events:
+        ta = l["address"].lower()
+        sym, dec = token_meta.get(ta, ("?", 18))
+        qty = (int(l["data"], 16) / 10 ** dec) if l.get("data") not in (None, "0x") else 0
+        other_topic = l["topics"][1] if direction == "IN" else l["topics"][2]
+        counterparty = "0x" + other_topic[-40:]
+        ts = block_ts.get(l["blockNumber"])
+        price = price_by_addr.get(ta)
+        out["operations"].append({
+            "ts": datetime.fromtimestamp(ts, tz=timezone.utc).isoformat() if ts else None,
+            "ts_local": (datetime.fromtimestamp(ts, tz=TZ).strftime("%d/%m/%Y %H:%M")
+                         if ts else "N/D"),
+            "direction": direction,
+            "symbol": sym,
+            "qty": qty,
+            "value_usd_now": round(qty * price, 2) if price else None,
+            "counterparty": counterparty,
+            "tx_hash": l.get("transactionHash"),
+            "tx_url": f"{explorer}/tx/{l.get('transactionHash')}",
+        })
+
+    # coppie IN+OUT nella stessa transazione = swap
+    by_tx = {}
+    for o in out["operations"]:
+        by_tx.setdefault(o["tx_hash"], set()).add(o["direction"])
+    for o in out["operations"]:
+        o["is_swap"] = by_tx.get(o["tx_hash"]) == {"IN", "OUT"}
+    return out
+
+
 # ------------------------------------------------------------------ watchlist
 
 def fetch_watchlist():
@@ -480,10 +724,13 @@ def main():
     screened.sort(key=lambda c: (order.get(c["classification"], 9), -c["score_partial"]))
     screened = screened[:CONFIG["max_candidates_shown"]]
 
-    print("[4/6] Watchlist handoff (DexScreener)…")
+    print("[4/7] Watchlist handoff (DexScreener)…")
     watchlist = fetch_watchlist()
 
-    print("[5/6] Radar globale chain secondarie (GeckoTerminal)…")
+    print("[5/7] Wallet monitorati (Blockscout + RPC)…")
+    wallets = [fetch_wallet(w) for w in CONFIG.get("wallets", [])]
+
+    print("[6/7] Radar globale chain secondarie (GeckoTerminal)…")
     global_radar = []
     for net in CONFIG["secondary_networks"]:
         npools, ninc = gt_pools(net["geckoterminal_id"], "new_pools")
@@ -499,7 +746,7 @@ def main():
                              "new_pools_seen": len(npools),
                              "candidates": kept[:5]})
 
-    print("[6/6] Delta e storico…")
+    print("[7/7] Delta e storico…")
     previous, history = load_previous(out_dir)
     deltas = compute_deltas(screened, previous)
 
@@ -509,6 +756,7 @@ def main():
         "dex_vol_24h": status["dex_vol_24h"],
         "n_candidates": len(screened),
         "n_hpw": sum(1 for c in screened if c["classification"] == "HIGH-PRIORITY WATCH"),
+        "wallet_value": wallets[0]["total_value_usd"] if wallets else None,
     })
     history = history[-CONFIG["history_max_points"]:]
 
@@ -527,6 +775,7 @@ def main():
         "candidates": screened,
         "n_hpw": n_hpw,
         "watchlist": watchlist,
+        "wallets": wallets,
         "global_radar": global_radar,
         "deltas": deltas,
     }

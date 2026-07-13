@@ -76,6 +76,96 @@ function renderStatus(d) {
     || `<tr><td class="empty">dato non disponibile</td></tr>`;
 }
 
+const CAP_KEY = "alpha_radar_capitale_disponibile_usd";
+
+function getCapital() {
+  const v = parseFloat(localStorage.getItem(CAP_KEY));
+  return isNaN(v) ? null : v;
+}
+
+function renderWallets(d) {
+  const el = document.getElementById("wallet-content");
+  if (!d.wallets || !d.wallets.length) {
+    el.innerHTML = `<p class="empty">Nessun wallet configurato.</p>`;
+    return;
+  }
+  el.innerHTML = d.wallets.map((w, wi) => {
+    const cap = getCapital();
+    const total = w.total_value_usd;
+    const power = (total !== null && cap !== null) ? total + cap : null;
+    const nativeRow = (w.native_eth !== null && w.native_eth > 0)
+      ? `<tr><td class="tok">ETH <span class="name">nativo</span></td>
+           <td class="num">${w.native_eth.toFixed(6)}</td>
+           <td class="num">${fmtUSD(w.eth_price_usd)}</td>
+           <td class="num">${fmtUSD(w.native_eth * (w.eth_price_usd || 0))}</td>
+           <td></td><td><span class="tag fact">fatto</span></td></tr>` : "";
+    const posRows = w.positions.map((p) => {
+      const dust = p.value_usd !== null && p.value_usd < 1;
+      return `<tr class="${dust ? "dust" : ""}">
+        <td class="tok"><a href="${esc(p.explorer_url)}" target="_blank" rel="noopener">${esc(p.symbol)}</a>
+          <span class="name">${esc(p.name || "")}</span></td>
+        <td class="num">${new Intl.NumberFormat("it-CH", { maximumFractionDigits: 4 }).format(p.qty)}</td>
+        <td class="num">${p.price_usd !== null ? "$" + p.price_usd.toPrecision(4) : "N/D"}</td>
+        <td class="num">${p.value_usd !== null ? fmtUSD(p.value_usd, false) : "N/D"}</td>
+        <td class="num">${p.alloc_pct !== null && p.alloc_pct !== undefined
+          ? `<div class="score-bar"><div class="bar"><div class="fill" style="width:${p.alloc_pct}%"></div></div><span>${p.alloc_pct}%</span></div>` : ""}</td>
+        <td><span class="tag ${p.price_source ? "est" : "nd"}">${p.price_source || "N/D"}</span>
+          ${p.price_warning ? `<span class="flag" title="${esc(p.price_warning)}">⚠ liq. esigua</span>` : ""}</td>
+      </tr>`;
+    }).join("");
+    const opRows = (w.operations || []).map((o) => `<tr>
+      <td class="num">${esc(o.ts_local)}</td>
+      <td><span class="badge ${o.direction === "IN" ? "hpw" : "avoid"}">${o.direction}</span>
+        ${o.is_swap ? '<span class="tag inf">swap</span>' : ""}</td>
+      <td class="tok">${esc(o.symbol)}</td>
+      <td class="num">${new Intl.NumberFormat("it-CH", { maximumFractionDigits: 4 }).format(o.qty)}</td>
+      <td class="num">${o.value_usd_now !== null ? fmtUSD(o.value_usd_now, false) : "N/D"}</td>
+      <td class="num"><a href="${esc(o.tx_url)}" target="_blank" rel="noopener" class="mono">${esc((o.counterparty || "").slice(0, 10))}… ↗</a></td>
+    </tr>`).join("");
+    const errs = (w.source_errors || []).length
+      ? `<div class="warn-box">⚠ Fonti parzialmente indisponibili in questa scansione: ${w.source_errors.join(", ")} — riprova automatica alla prossima ora.</div>` : "";
+    return `<div class="panel">
+      <h3>${esc(w.label)} · <a href="${esc(w.explorer_url)}" target="_blank" rel="noopener" class="mono">${esc(w.address.slice(0, 8))}…${esc(w.address.slice(-6))} ↗</a>
+        ${w.account_type ? `<span class="tag inf" title="smart account">${esc(w.account_type)}</span>` : ""}</h3>
+      ${errs}
+      <div class="cards">
+        <div class="card"><div class="k">Valore posizioni on-chain <span class="tag est">stima</span></div>
+          <div class="v">${total !== null ? fmtUSD(total, false) : "N/D"}</div>
+          <div class="d">${w.positions.length} posizioni${w.unpriced_positions ? ` · ${w.unpriced_positions} senza prezzo` : ""}</div></div>
+        <div class="card capital-card"><div class="k">Capitale pronto da investire</div>
+          <div class="v"><input id="cap-input-${wi}" type="number" min="0" step="100"
+            placeholder="es. 10000" value="${cap !== null ? cap : ""}"> USD</div>
+          <div class="d"><button id="cap-save-${wi}">Salva</button>
+            <span class="cov">solo nel tuo browser (localStorage), non pubblicato</span></div></div>
+        <div class="card"><div class="k">Capitale operativo totale <span class="tag inf">inferenza</span></div>
+          <div class="v" id="power-${wi}">${power !== null ? fmtUSD(power, false) : "imposta il capitale →"}</div>
+          <div class="d">posizioni + capitale disponibile</div></div>
+      </div>
+      <h3 style="margin-top:16px">Posizioni attuali <span class="tag fact">saldi on-chain</span></h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Asset</th><th>Quantità</th><th>Prezzo</th><th>Valore</th><th>Allocazione</th><th>Fonte prezzo</th></tr></thead>
+        <tbody>${nativeRow}${posRows || '<tr><td colspan="6" class="empty">nessuna posizione</td></tr>'}</tbody>
+      </table></div>
+      <h3 style="margin-top:16px">Operazioni recenti <span class="tag fact">eventi Transfer on-chain</span></h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Data (Zurich)</th><th>Dir</th><th>Asset</th><th>Quantità</th><th>Valore attuale</th><th>Controparte / tx</th></tr></thead>
+        <tbody>${opRows || '<tr><td colspan="6" class="empty">operazioni non disponibili in questa scansione</td></tr>'}</tbody>
+      </table></div>
+    </div>`;
+  }).join("");
+
+  d.wallets.forEach((w, wi) => {
+    const btn = document.getElementById(`cap-save-${wi}`);
+    if (!btn) return;
+    btn.addEventListener("click", () => {
+      const v = parseFloat(document.getElementById(`cap-input-${wi}`).value);
+      if (isNaN(v) || v < 0) { localStorage.removeItem(CAP_KEY); }
+      else { localStorage.setItem(CAP_KEY, String(v)); }
+      renderWallets(d); // ridisegna con il nuovo capitale
+    });
+  });
+}
+
 function renderCandidates(d) {
   const tb = document.querySelector("#cand-table tbody");
   if (!d.candidates.length) {
@@ -203,6 +293,7 @@ async function main() {
   document.getElementById("generated-at").textContent = `ultimo aggiornamento: ${d.generated_at_local}`;
 
   renderStatus(d);
+  renderWallets(d);
   renderCandidates(d);
   renderWatchlist(d);
   renderDeltas(d);

@@ -4,8 +4,17 @@
     "defillama_name": "Robinhood Chain",
     "geckoterminal_id": "robinhood",
     "dexscreener_id": "robinhood",
-    "chain_id": 4663
+    "chain_id": 4663,
+    "rpc": "https://rpc.mainnet.chain.robinhood.com",
+    "explorer": "https://robinhoodchain.blockscout.com"
   },
+  "wallets": [
+    {
+      "address": "0xdc790faE084f5edF6b72Cc6932D5776001f2870E",
+      "label": "Wallet operativo",
+      "chain": "robinhood"
+    }
+  ],
   "secondary_networks": [
     {"label": "Solana", "geckoterminal_id": "solana", "dexscreener_id": "solana"},
     {"label": "Base", "geckoterminal_id": "base", "dexscreener_id": "base"},
