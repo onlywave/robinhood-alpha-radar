@@ -80,6 +80,61 @@ function renderStatus(d) {
 const MIN_POSITION_USD = 10;
 const CAP_KEY = "alpha_radar_capitale_disponibile_usd";
 
+function renderSummary(d) {
+  const el = document.getElementById("summary-content");
+  const buys = (d.candidates || []).filter((c) => c.classification === "ALPHA BUY ALERT");
+  const noTrade = buys.length === 0;
+  const w = (d.wallets || [])[0];
+  const cap = getCapital();
+
+  // prossimo aggiornamento: la scansione parte al minuto 17 di ogni ora (~+3' di deploy)
+  const next = new Date();
+  next.setMinutes(20, 0, 0);
+  if (new Date().getMinutes() >= 17) next.setHours(next.getHours() + 1);
+  const nextStr = next.toLocaleTimeString("it-CH", { hour: "2-digit", minute: "2-digit" });
+
+  const verdict = noTrade
+    ? `<div class="verdict notrade">⏸ Adesso: <strong>non comprare nulla</strong></div>
+       <p>Nessun token supera oggi tutti i controlli di qualità e sicurezza.
+       È normale: la maggior parte dei token nuovi è spazzatura o truffa, e il sistema è
+       fatto per scartarli. La mossa giusta è <strong>aspettare</strong> e tenere il capitale liquido.</p>`
+    : `<div class="verdict buysig">🚨 Adesso: <strong>${buys.length === 1
+         ? "1 segnale d'acquisto attivo" : buys.length + " segnali d'acquisto attivi"}
+       — ${buys.map((b) => esc(b.token_symbol)).join(", ")}</strong></div>
+       <p>${buys.length === 1 ? "Un token ha" : "Alcuni token hanno"} superato tutti i controlli
+       automatici (qualità, sicurezza del contratto, distribuzione, vendibilità).
+       <strong>Non è un ordine di acquisto:</strong> scorri alla scheda verde qui sotto,
+       leggi i dati, esegui la verifica finale indicata e decidi tu.
+       Investi solo ciò che puoi permetterti di perdere del tutto.</p>`;
+
+  el.innerHTML = `<div class="panel hero ${noTrade ? "" : "hero-buy"}">
+    <div class="hero-left">
+      ${verdict}
+      <div class="howto">
+        <strong>Come usare questa pagina in 30 secondi</strong>
+        <ol>
+          <li>Guarda il riquadro qui sopra: dice se oggi c'è qualcosa da fare oppure no.</li>
+          <li>Se dice "non comprare nulla" → hai finito, torna più tardi (si aggiorna da sola ogni ora).</li>
+          <li>Se c'è un segnale 🚨 → leggi la scheda verde, esegui la verifica finale e decidi con calma.</li>
+          <li>Le sezioni sotto mostrano il tuo portafoglio, i token osservati e perché (non) sono segnali.</li>
+        </ol>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="mini"><span class="k">Il tuo portafoglio on-chain</span>
+        <span class="v">${w && w.total_value_usd !== null ? fmtUSD(w.total_value_usd, false) : "N/D"}</span></div>
+      <div class="mini"><span class="k">Capitale pronto (lo imposti tu)</span>
+        <span class="v">${cap !== null ? fmtUSD(cap, false) : "da impostare ↓"}</span></div>
+      <div class="mini"><span class="k">Segnali d'acquisto attivi</span>
+        <span class="v ${noTrade ? "" : "up"}">${buys.length}</span></div>
+      <div class="mini"><span class="k">Token in osservazione</span>
+        <span class="v">${(d.candidates || []).length}</span></div>
+      <div class="mini"><span class="k">Prossimo aggiornamento</span>
+        <span class="v">~${nextStr}</span></div>
+    </div>
+  </div>`;
+}
+
 function renderBuyAlerts(d) {
   const el = document.getElementById("buy-content");
   const buys = (d.candidates || []).filter((c) => c.classification === "ALPHA BUY ALERT");
@@ -161,7 +216,14 @@ function renderWallets(d) {
           ${p.price_warning ? `<span class="flag" title="${esc(p.price_warning)}">⚠ liq. esigua</span>` : ""}</td>
       </tr>`;
     }).join("");
-    const opRows = (w.operations || []).map((o) => `<tr>
+    // operazioni: solo quelle rilevanti (>$10), tenendo intere le coppie swap
+    const txMax = {};
+    (w.operations || []).forEach((o) => {
+      txMax[o.tx_hash] = Math.max(txMax[o.tx_hash] || 0, o.value_usd_now || 0);
+    });
+    const opsShown = (w.operations || []).filter((o) => (txMax[o.tx_hash] || 0) >= MIN_POSITION_USD);
+    const opsHidden = (w.operations || []).length - opsShown.length;
+    const opRows = opsShown.map((o) => `<tr>
       <td class="num">${esc(o.ts_local)}</td>
       <td><span class="badge ${o.direction === "IN" ? "hpw" : "avoid"}">${o.direction}</span>
         ${o.is_swap ? '<span class="tag inf">swap</span>' : ""}</td>
@@ -197,8 +259,9 @@ function renderWallets(d) {
       <h3 style="margin-top:16px">Operazioni recenti <span class="tag fact">eventi Transfer on-chain</span></h3>
       <div class="table-wrap"><table>
         <thead><tr><th>Data (Zurich)</th><th>Dir</th><th>Asset</th><th>Quantità</th><th>Valore attuale</th><th>Controparte / tx</th></tr></thead>
-        <tbody>${opRows || '<tr><td colspan="6" class="empty">operazioni non disponibili in questa scansione</td></tr>'}</tbody>
+        <tbody>${opRows || '<tr><td colspan="6" class="empty">nessuna operazione rilevante (o dati non disponibili in questa scansione)</td></tr>'}</tbody>
       </table></div>
+      ${opsHidden ? `<p class="cov" style="margin:6px 0 0">${opsHidden} operazioni minori (airdrop/dust sotto $${MIN_POSITION_USD}) non mostrate.</p>` : ""}
     </div>`;
   }).join("");
 
@@ -209,7 +272,8 @@ function renderWallets(d) {
       const v = parseFloat(document.getElementById(`cap-input-${wi}`).value);
       if (isNaN(v) || v < 0) { localStorage.removeItem(CAP_KEY); }
       else { localStorage.setItem(CAP_KEY, String(v)); }
-      renderWallets(d); // ridisegna con il nuovo capitale
+      renderWallets(d);  // ridisegna con il nuovo capitale
+      renderSummary(d);  // aggiorna anche il riquadro in sintesi
     });
   });
 }
@@ -354,9 +418,9 @@ async function main() {
   }
   document.getElementById("op-state").textContent = d.operational_state;
   if (d.operational_state !== "NO TRADE") document.getElementById("op-state").classList.add("alert");
-  document.getElementById("op-note").textContent = d.operational_note;
   document.getElementById("generated-at").textContent = `ultimo aggiornamento: ${d.generated_at_local}`;
 
+  renderSummary(d);
   renderStatus(d);
   renderBuyAlerts(d);
   renderWallets(d);

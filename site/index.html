@@ -15,12 +15,17 @@
   </div>
   <p class="subtitle">Intelligence early-stage multi-segnale · scansione automatica ogni ora ·
     <span id="generated-at">caricamento…</span></p>
-  <p id="op-note" class="op-note"></p>
 </header>
 
 <main>
+  <section id="summary">
+    <div id="summary-content"></div>
+  </section>
+
   <section id="chain-status">
     <h2>Stato della chain</h2>
+    <p class="hint">I numeri di fondo della Robinhood Chain: quanto capitale è depositato (TVL)
+      e quanto si scambia sui DEX. Se crescono, l'ecosistema sta attirando denaro.</p>
     <div class="cards" id="status-cards"></div>
     <div class="split">
       <div class="panel">
@@ -40,24 +45,27 @@
 
   <section id="buy-section">
     <h2>🚨 ALPHA BUY ALERT</h2>
+    <p class="hint">Qui compaiono solo i token che superano <strong>tutti</strong> i controlli
+      automatici. Se questa sezione è vuota, non c'è niente da comprare: la mossa giusta è
+      aspettare. Se compare una scheda verde, non è un ordine: leggila e fai la verifica finale
+      indicata.</p>
     <div id="buy-content"></div>
   </section>
 
   <section id="portfolio">
     <h2>Portafoglio — wallet monitorato</h2>
+    <p class="hint">Cosa possiede ora il wallet e cosa ha fatto di recente. Mostriamo solo
+      posizioni e operazioni sopra $10: airdrop di token-spazzatura e movimenti a valore zero
+      sono nascosti (col conteggio indicato).</p>
     <div id="wallet-content"></div>
   </section>
 
   <section id="candidates">
     <h2>Candidati early-stage — Robinhood Chain</h2>
-    <p class="hint">Score <strong>rinormalizzato sulla copertura dati reale</strong>: liquidità,
-      distribuzione holder, crescita holder, deployer/owner e verifica contratto sono letti
-      on-chain (Blockscout + RPC); smart money è un <em>proxy di distribuzione</em>, non analisi
-      wallet-level; team proximity e GitHub restano N/D. Un candidato diventa
-      <span class="badge buy">ALPHA BUY ALERT</span> solo superando <strong>tutti</strong> i gate
-      (score ≥85, copertura ≥60%, contratto verificato, owner rinunciato, top-10 ≤30%,
-      sellability empirica). Il segnale resta automatico e fallibile: prima di agire va eseguita
-      la verifica finale.</p>
+    <p class="hint">Tutti i token nuovi sotto osservazione, ordinati dal più promettente.
+      Verde brillante = segnale d'acquisto, verde = quasi pronto, giallo = da osservare,
+      rosso = evitare. La colonna <strong>Segnali</strong> dice esattamente cosa manca a ciascuno
+      per diventare un segnale d'acquisto (dettagli sul metodo in fondo alla pagina).</p>
     <div class="table-wrap">
       <table id="cand-table">
         <thead><tr>
@@ -71,11 +79,14 @@
 
   <section id="watchlist">
     <h2>Watchlist handoff</h2>
+    <p class="hint">I quattro progetti storici sotto osservazione continua, con lo stato deciso
+      nell'handoff operativo e i dati aggiornati a ogni scansione.</p>
     <div id="watch-cards" class="watch-grid"></div>
   </section>
 
   <section id="deltas">
     <h2>Variazioni dall'ultima scansione</h2>
+    <p class="hint">Cosa è cambiato nell'ultima ora: token entrati, usciti o riclassificati.</p>
     <div id="delta-content" class="panel"></div>
   </section>
 
@@ -87,7 +98,28 @@
   </section>
 
   <section id="method">
-    <h2>Metodologia e limiti</h2>
+    <h2>Metodologia e limiti — come funziona, nel dettaglio</h2>
+    <div class="panel">
+      <h3>Il processo, passo passo</h3>
+      <ol class="steps">
+        <li><strong>Discovery</strong> — ogni ora leggiamo i nuovi pool e i pool in tendenza su
+          Robinhood Chain (GeckoTerminal) e su 7 chain secondarie, più TVL e volumi (DefiLlama).</li>
+        <li><strong>Screening</strong> — scartiamo subito ciò che ha liquidità sotto $25k, meno di
+          30 transazioni/24h, volume sospetto di wash trading o pump su liquidità esigua.</li>
+        <li><strong>Analisi on-chain</strong> — per i migliori leggiamo direttamente la blockchain:
+          contratto verificato, owner rinunciato, chi ha creato il token e quanto ne detiene,
+          quanti holder ci sono e come cresce il numero, quanto è concentrata la supply
+          (esclusi pool e burn), quante vendite reali avvengono.</li>
+        <li><strong>Score e gate</strong> — ogni candidato riceve uno score 0–100 pesato
+          (pesi qui sotto) e rinormalizzato sulla copertura dati reale. Diventa
+          <span class="badge buy">ALPHA BUY ALERT</span> solo superando TUTTI i gate:
+          score ≥85, copertura ≥60%, liquidità ≥$150k, contratto verificato, owner rinunciato,
+          top-10 ≤30%, ≥300 holder, ≥50 vendite reali/24h, età 24h–30g, zero red flag.</li>
+        <li><strong>Verifica finale umana</strong> — prima di agire su un segnale va eseguito
+          <code>python3 scripts/verifica_finale.py &lt;contract&gt;</code>: ricontrolla tutto da
+          fonti indipendenti e stampa una checklist PASS/WARN/FAIL.</li>
+      </ol>
+    </div>
     <div class="split">
       <div class="panel">
         <h3>Pesi dello score (handoff §7)</h3>
