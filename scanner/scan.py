@@ -14,6 +14,7 @@ proximity, holder growth, deployer, GitHub) sono dichiarate N/D e la
 classificazione massima emessa dal sistema è HIGH-PRIORITY WATCH.
 """
 
+import gzip
 import json
 import os
 import ssl
@@ -89,9 +90,13 @@ def http_json(url, retries=2, timeout=25, gt=False, headers=None):
         GT_LAST_CALL[0] = time.time()
     for attempt in range(retries + 1):
         try:
-            req = urllib.request.Request(url, headers=headers or UA)
+            req = urllib.request.Request(
+                url, headers={**(headers or UA), "Accept-Encoding": "gzip"})
             with urllib.request.urlopen(req, timeout=timeout, context=SSL_CTX) as r:
-                return json.loads(r.read().decode("utf-8"))
+                raw = r.read()
+                if r.headers.get("Content-Encoding") == "gzip":
+                    raw = gzip.decompress(raw)
+                return json.loads(raw.decode("utf-8"))
         except urllib.error.HTTPError as e:
             if e.code == 429 and attempt < retries:
                 time.sleep(20)  # rate limit: attendere una finestra piena
@@ -968,8 +973,10 @@ def load_previous(out_dir):
     base = published_base()
     prev, hist = None, []
     if base:
-        prev = http_json(f"{base}/data/latest.json?cb={int(time.time())}")
-        hist = http_json(f"{base}/data/history.json?cb={int(time.time())}") or []
+        prev = http_json(f"{base}/data/latest.json?cb={int(time.time())}",
+                         retries=4)
+        hist = http_json(f"{base}/data/history.json?cb={int(time.time())}",
+                         retries=4) or []
     if prev is None:
         try:
             prev = json.load(open(os.path.join(out_dir, "latest.json")))
@@ -983,23 +990,33 @@ def load_previous(out_dir):
     return prev, hist
 
 
+SIGNALS_CANONICAL = os.path.join(ROOT, "data", "signals.json")
+# campi ricalcolati a ogni scansione: restano solo nella copia pubblicata,
+# così il file canonico committato cambia solo a eventi strutturali
+SIGNALS_VOLATILE = {"price_now", "price_checked_utc", "change_pct",
+                    "last_seen_utc", "score_last"}
+
+
 def update_signals(buys, out_dir, now):
     """Registro PERMANENTE dei segnali BUY: primo avvistamento con prezzo,
     prezzo corrente e variazione %, stato attivo/cessato.
 
-    Un segnale viene marcato 'cessato' solo dopo 3 scansioni consecutive di
-    assenza (le fonti on-chain hanno buchi intermittenti che farebbero
-    lampeggiare lo stato); se poi rientra, viene riattivato contando la
-    riattivazione. I record non vengono mai eliminati."""
-    base = published_base()
+    Persistenza a prova di perdita: il file canonico vive NEL REPO
+    (data/signals.json, committato dalla CI quando cambia); il sito pubblicato
+    riceve la copia arricchita dei prezzi correnti. Ordine di caricamento:
+    repo -> sito pubblicato -> seed. Un segnale viene marcato 'cessato' solo
+    dopo 3 scansioni consecutive di assenza (anti-flap); se rientra viene
+    riattivato contando la riattivazione. I record non vengono mai eliminati."""
     sig = None
-    if base:
-        sig = http_json(f"{base}/data/signals.json?cb={int(time.time())}")
+    try:
+        sig = json.load(open(SIGNALS_CANONICAL))
+    except Exception:
+        pass
     if sig is None:
-        try:
-            sig = json.load(open(os.path.join(out_dir, "signals.json")))
-        except Exception:
-            sig = None
+        base = published_base()
+        if base:
+            sig = http_json(f"{base}/data/signals.json?cb={int(time.time())}",
+                            retries=4)
     if sig is None:
         try:
             sig = json.load(open(os.path.join(ROOT, "scanner",
@@ -1071,6 +1088,12 @@ def update_signals(buys, out_dir, now):
     sig.sort(key=lambda s: s.get("first_seen_utc") or "", reverse=True)
     with open(os.path.join(out_dir, "signals.json"), "w") as f:
         json.dump(sig, f, ensure_ascii=False, indent=1)
+    canon = [{k: v for k, v in s.items() if k not in SIGNALS_VOLATILE}
+             for s in sig]
+    os.makedirs(os.path.dirname(SIGNALS_CANONICAL), exist_ok=True)
+    with open(SIGNALS_CANONICAL, "w") as f:
+        json.dump(canon, f, ensure_ascii=False, indent=1)
+        f.write("\n")
     return sig
 
 
@@ -1097,6 +1120,7 @@ def compute_deltas(current, previous):
 # ------------------------------------------------------------------------ main
 
 def main():
+    t0 = time.time()
     out_dir = sys.argv[sys.argv.index("--out") + 1] if "--out" in sys.argv else \
         os.path.join(ROOT, "site", "data")
     os.makedirs(out_dir, exist_ok=True)
@@ -1216,6 +1240,13 @@ def main():
         "wallets": wallets,
         "global_radar": global_radar,
         "deltas": deltas,
+        "scan_health": {
+            "duration_s": round(time.time() - t0, 1),
+            "blockscout_degraded": BS_FAILS[0] >= 8,
+            "blockscout_fail_score": BS_FAILS[0],
+            "previous_state_loaded": previous is not None,
+            "history_points": len(history),
+        },
     }
 
     with open(os.path.join(out_dir, "latest.json"), "w") as f:

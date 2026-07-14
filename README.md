@@ -71,8 +71,18 @@ site/data/         # output locale di test (non versionato)
 .github/workflows/scan-and-deploy.yml  # cron orario → build → GitHub Pages
 ```
 
-Lo storico tra le esecuzioni viene recuperato dal sito pubblicato
-(`data/history.json`), quindi il repo non accumula commit di dati.
+Persistenza su due livelli:
+- **Registro segnali** (`data/signals.json` nel repo): canonico e versionato in
+  git — la CI lo committa solo quando cambia strutturalmente (nuovo segnale,
+  cessazione, riattivazione), con `[skip ci]` e path-filter anti-loop. I prezzi
+  correnti vivono nella copia pubblicata su Pages e nel refresh live del browser.
+- **Storico metriche** (`data/history.json`): recuperato dal sito pubblicato a
+  ogni run (perdita al più cosmetica in caso di fetch fallito).
+
+Robustezza: circuit-breaker su Blockscout (istanza instabile), fallback RPC
+completo per il wallet, gzip su tutte le richieste, timeout job 15 min,
+`cancel-in-progress` sulle run sovrapposte, telemetria in `scan_health`
+(durata, degradazione fonti) dentro `latest.json`.
 
 ## Esecuzione locale
 

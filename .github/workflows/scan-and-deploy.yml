@@ -5,10 +5,12 @@ on:
     - cron: "17 * * * *"   # ogni ora al minuto 17 (evita i picchi di carico di GitHub)
   push:
     branches: [main]
+    paths-ignore:
+      - "data/**"          # i commit-dati del bot non devono ri-innescare il workflow
   workflow_dispatch: {}
 
 permissions:
-  contents: read
+  contents: write          # persistenza del registro segnali (data/signals.json)
   pages: write
   id-token: write
 
@@ -34,6 +36,23 @@ jobs:
         run: |
           mkdir -p _site/data
           python scanner/scan.py --out _site/data
+
+      - name: Persisti registro segnali nel repo (solo su cambi strutturali)
+        continue-on-error: true
+        run: |
+          if ! git diff --quiet -- data/signals.json || \
+             [ -n "$(git status --porcelain data/signals.json)" ]; then
+            git config user.name "alpha-radar-bot"
+            git config user.email "actions@users.noreply.github.com"
+            git add data/signals.json
+            git commit -m "data: registro segnali aggiornato [skip ci]"
+            for i in 1 2 3; do
+              git push && break
+              git pull --rebase && sleep 3
+            done
+          else
+            echo "registro invariato: nessun commit"
+          fi
 
       - name: Assembla sito statico
         run: cp -r site/index.html site/app.js site/style.css _site/
