@@ -9,10 +9,10 @@
   "price_at_signal": 1.39233616224159,
   "price_at_signal_source": "candela oraria GeckoTerminal (stima)",
   "score_at_signal": 84.4,
-  "active": false,
-  "missing_streak": 3,
-  "ended_utc": "2026-07-14T11:44:12.815613+00:00",
-  "reactivations": 0
+  "active": true,
+  "missing_streak": 0,
+  "ended_utc": null,
+  "reactivations": 1
  },
  {
   "token_address": "0x8e62f281f282686fca6dcb39288069a93fc23f1c",
