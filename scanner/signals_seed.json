@@ -1,0 +1,34 @@
+[
+ {
+  "token_address": "0x8e62f281f282686fca6dcb39288069a93fc23f1c",
+  "symbol": "HOODRAT",
+  "pool_address": "0x451c0da3b774045a822a129eedcc5c667dcbfdd8",
+  "ds_url": "https://dexscreener.com/robinhood/0x451c0da3b774045a822a129eedcc5c667dcbfdd8",
+  "first_seen_utc": "2026-07-13T15:04:24+00:00",
+  "first_seen_local": "13/07/2026 17:04",
+  "price_at_signal": 0.0106789874596671,
+  "price_at_signal_source": "candela oraria GeckoTerminal (stima)",
+  "score_at_signal": 85.1,
+  "active": true,
+  "missing_streak": 0,
+  "last_seen_utc": "2026-07-13T15:04:24+00:00",
+  "ended_utc": null,
+  "reactivations": 0
+ },
+ {
+  "token_address": "0xf2915d1e3c1b0c769d0c756ec43f1c1f6c99cd03",
+  "symbol": "ARROW",
+  "pool_address": "0xe40d98d88038e0b844f844dce6ae3c79ec01ec53",
+  "ds_url": "https://dexscreener.com/robinhood/0xe40d98d88038e0b844f844dce6ae3c79ec01ec53",
+  "first_seen_utc": "2026-07-13T21:12:48+00:00",
+  "first_seen_local": "13/07/2026 23:12",
+  "price_at_signal": 1.39233616224159,
+  "price_at_signal_source": "candela oraria GeckoTerminal (stima)",
+  "score_at_signal": 84.4,
+  "active": true,
+  "missing_streak": 0,
+  "last_seen_utc": "2026-07-13T21:12:48+00:00",
+  "ended_utc": null,
+  "reactivations": 0
+ }
+]

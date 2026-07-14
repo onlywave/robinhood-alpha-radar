@@ -50,6 +50,21 @@
       aspettare. Se compare una scheda verde, non è un ordine: leggila e fai la verifica finale
       indicata.</p>
     <div id="buy-content"></div>
+    <h3 style="margin-top:22px">📜 Storico dei segnali generati
+      <span class="tag fact">registro permanente</span>
+      <span class="tag est">prezzi aggiornati live</span></h3>
+    <p class="hint">Ogni segnale d'acquisto mai emesso dal radar, con data/ora, prezzo al momento
+      del segnale e prezzo attuale: la pagella pubblica e verificabile del sistema. Un segnale è
+      "cessato" quando il token non supera più i gate per 3 scansioni consecutive.</p>
+    <div class="table-wrap">
+      <table id="signals-table">
+        <thead><tr>
+          <th>Primo segnale (Zurich)</th><th>Token</th><th>Score</th>
+          <th>Prezzo al segnale</th><th>Prezzo attuale</th><th>Δ dal segnale</th><th>Stato</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </section>
 
   <section id="portfolio">

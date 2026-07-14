@@ -955,15 +955,17 @@ def fetch_watchlist():
 
 # ------------------------------------------------------------ storico e delta
 
-def load_previous(out_dir):
-    """Carica lo stato precedente: prima dal sito pubblicato, poi da disco."""
-    base = ""
+def published_base():
     repo = os.environ.get("GITHUB_REPOSITORY", "")
     if repo and "/" in repo:
         owner, name = repo.split("/", 1)
-        base = f"https://{owner}.github.io/{name}"
-    elif CONFIG.get("site_url"):
-        base = CONFIG["site_url"].rstrip("/")
+        return f"https://{owner}.github.io/{name}"
+    return (CONFIG.get("site_url") or "").rstrip("/")
+
+
+def load_previous(out_dir):
+    """Carica lo stato precedente: prima dal sito pubblicato, poi da disco."""
+    base = published_base()
     prev, hist = None, []
     if base:
         prev = http_json(f"{base}/data/latest.json?cb={int(time.time())}")
@@ -979,6 +981,97 @@ def load_previous(out_dir):
         except Exception:
             hist = []
     return prev, hist
+
+
+def update_signals(buys, out_dir, now):
+    """Registro PERMANENTE dei segnali BUY: primo avvistamento con prezzo,
+    prezzo corrente e variazione %, stato attivo/cessato.
+
+    Un segnale viene marcato 'cessato' solo dopo 3 scansioni consecutive di
+    assenza (le fonti on-chain hanno buchi intermittenti che farebbero
+    lampeggiare lo stato); se poi rientra, viene riattivato contando la
+    riattivazione. I record non vengono mai eliminati."""
+    base = published_base()
+    sig = None
+    if base:
+        sig = http_json(f"{base}/data/signals.json?cb={int(time.time())}")
+    if sig is None:
+        try:
+            sig = json.load(open(os.path.join(out_dir, "signals.json")))
+        except Exception:
+            sig = None
+    if sig is None:
+        try:
+            sig = json.load(open(os.path.join(ROOT, "scanner",
+                                              "signals_seed.json")))
+            print("[signals] registro inizializzato dal seed")
+        except Exception:
+            sig = []
+
+    by_addr = {s["token_address"]: s for s in sig}
+    now_iso = now.isoformat()
+    current = set()
+    for c in buys:
+        ta = (c.get("token_address") or "").lower()
+        if not ta:
+            continue
+        current.add(ta)
+        s = by_addr.get(ta)
+        if s is None:
+            sig.append({
+                "token_address": ta, "symbol": c.get("token_symbol"),
+                "pool_address": c.get("pool_address"),
+                "ds_url": c.get("ds_url"),
+                "first_seen_utc": now_iso,
+                "first_seen_local": datetime.now(TZ).strftime("%d/%m/%Y %H:%M"),
+                "price_at_signal": c.get("price_usd"),
+                "price_at_signal_source": "prezzo live alla scansione del segnale",
+                "score_at_signal": c.get("score_norm"),
+                "active": True, "missing_streak": 0,
+                "last_seen_utc": now_iso, "ended_utc": None,
+                "reactivations": 0,
+            })
+        else:
+            if not s.get("active"):
+                s["reactivations"] = s.get("reactivations", 0) + 1
+                s["ended_utc"] = None
+            s["active"] = True
+            s["missing_streak"] = 0
+            s["last_seen_utc"] = now_iso
+            s["score_last"] = c.get("score_norm")
+    for s in sig:
+        if s["token_address"] not in current:
+            s["missing_streak"] = s.get("missing_streak", 0) + 1
+            if s.get("active") and s["missing_streak"] >= 3:
+                s["active"] = False
+                s["ended_utc"] = now_iso
+
+    # prezzo corrente per TUTTI i segnali storici (batch DexScreener da 30)
+    addrs = [s["token_address"] for s in sig]
+    prices = {}
+    for i in range(0, len(addrs), 30):
+        chunk = addrs[i:i + 30]
+        d = http_json(f"https://api.dexscreener.com/tokens/v1/"
+                      f"{CONFIG['primary_chain']['dexscreener_id']}/{','.join(chunk)}")
+        best = {}
+        for p in d or []:
+            ta = ((p.get("baseToken") or {}).get("address") or "").lower()
+            liq = fnum((p.get("liquidity") or {}).get("usd"))
+            if ta and (ta not in best or liq > best[ta][0]):
+                best[ta] = (liq, fnum(p.get("priceUsd"), None))
+        prices.update({k: v[1] for k, v in best.items()})
+    for s in sig:
+        px = prices.get(s["token_address"])
+        if px is not None:
+            s["price_now"] = px
+            s["price_checked_utc"] = now_iso
+            if s.get("price_at_signal"):
+                s["change_pct"] = round(
+                    100 * (px / float(s["price_at_signal"]) - 1), 2)
+    sig.sort(key=lambda s: s.get("first_seen_utc") or "", reverse=True)
+    with open(os.path.join(out_dir, "signals.json"), "w") as f:
+        json.dump(sig, f, ensure_ascii=False, indent=1)
+    return sig
 
 
 def compute_deltas(current, previous):
@@ -1076,8 +1169,11 @@ def main():
                              "new_pools_seen": len(npools),
                              "candidates": kept[:5]})
 
-    print("[7/7] Delta e storico…")
+    print("[7/7] Delta, registro segnali e storico…")
     deltas = compute_deltas(screened, previous)
+    signals = update_signals(buys, out_dir, now)
+    print(f"[signals] registro: {len(signals)} segnali "
+          f"({sum(1 for s in signals if s.get('active'))} attivi)")
 
     history.append({
         "ts": now.isoformat(),

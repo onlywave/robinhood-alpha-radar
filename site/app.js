@@ -404,6 +404,66 @@ function renderGlobal(d) {
   }).join("");
 }
 
+const fmtPx = (v) => (v === null || v === undefined) ? "N/D"
+  : "$" + Number(v).toPrecision(4);
+
+function signalRow(s) {
+  const chg = s.change_pct;
+  return `<tr>
+    <td class="num">${esc(s.first_seen_local || (s.first_seen_utc || "").slice(0, 16))}</td>
+    <td class="tok"><a href="${esc(s.ds_url || "#")}" target="_blank" rel="noopener">${esc(s.symbol)}</a></td>
+    <td class="num">${s.score_at_signal ?? "N/D"}</td>
+    <td class="num">${fmtPx(s.price_at_signal)}</td>
+    <td class="num" data-pxnow="${esc(s.token_address)}">${fmtPx(s.price_now)}</td>
+    <td class="num ${chg > 0 ? "up" : chg < 0 ? "down" : ""}" data-chg="${esc(s.token_address)}"
+      data-base="${s.price_at_signal ?? ""}">${fmtPct(chg, 1)}</td>
+    <td>${s.active
+      ? `<span class="badge hpw">ATTIVO</span>${s.reactivations ? ` <span class="cov">riattivato ×${s.reactivations}</span>` : ""}`
+      : `<span class="badge disc">cessato</span> <span class="cov">${esc((s.ended_utc || "").slice(0, 16).replace("T", " "))}</span>`}</td>
+  </tr>`;
+}
+
+async function renderSignals() {
+  const tb = document.querySelector("#signals-table tbody");
+  let sig = [];
+  try {
+    sig = await (await fetch(`data/signals.json?cb=${Date.now()}`)).json();
+  } catch (e) { /* registro non ancora pubblicato */ }
+  if (!sig.length) {
+    tb.innerHTML = `<tr><td colspan="7" class="empty">Nessun segnale registrato finora.
+      Il registro parte dal primo ALPHA BUY ALERT emesso.</td></tr>`;
+    return;
+  }
+  tb.innerHTML = sig.map(signalRow).join("");
+
+  // aggiornamento prezzi LIVE a ogni apertura pagina (DexScreener, best-effort)
+  try {
+    const addrs = sig.map((s) => s.token_address);
+    for (let i = 0; i < addrs.length; i += 30) {
+      const chunk = addrs.slice(i, i + 30);
+      const pairs = await (await fetch(
+        `https://api.dexscreener.com/tokens/v1/robinhood/${chunk.join(",")}`)).json();
+      const best = {};
+      for (const p of pairs || []) {
+        const ta = (p.baseToken?.address || "").toLowerCase();
+        const liq = p.liquidity?.usd || 0;
+        if (ta && (!best[ta] || liq > best[ta].liq)) best[ta] = { liq, px: parseFloat(p.priceUsd) };
+      }
+      for (const [ta, v] of Object.entries(best)) {
+        if (!v.px) continue;
+        const pxCell = document.querySelector(`[data-pxnow="${ta}"]`);
+        const chgCell = document.querySelector(`[data-chg="${ta}"]`);
+        if (pxCell) pxCell.textContent = fmtPx(v.px) + " ⚡";
+        if (chgCell && chgCell.dataset.base) {
+          const chg = 100 * (v.px / parseFloat(chgCell.dataset.base) - 1);
+          chgCell.textContent = fmtPct(chg, 1);
+          chgCell.className = `num ${chg > 0 ? "up" : chg < 0 ? "down" : ""}`;
+        }
+      }
+    }
+  } catch (e) { /* si resta sui prezzi dell'ultima scansione */ }
+}
+
 function renderWeights() {
   const weights = [
     ["Smart Money", 25, "est", "proxy distribuzione"],
@@ -438,6 +498,7 @@ async function main() {
   renderSummary(d);
   renderStatus(d);
   renderBuyAlerts(d);
+  renderSignals();
   renderWallets(d);
   renderCandidates(d);
   renderWatchlist(d);
