@@ -1,5 +1,35 @@
 [
  {
+  "token_address": "0x77581054581b9c525e7dd7a0155de43867532d03",
+  "symbol": "WISHBONE",
+  "pool_address": "0x6ec89bff5e684c2561d0a88e185d8d4eb4b3aa30",
+  "ds_url": "https://dexscreener.com/robinhood/0x6ec89bff5e684c2561d0a88e185d8d4eb4b3aa30",
+  "first_seen_utc": "2026-07-14T21:15:14.888768+00:00",
+  "first_seen_local": "14/07/2026 23:17",
+  "price_at_signal": 0.00697504954233748,
+  "price_at_signal_source": "prezzo live alla scansione del segnale",
+  "score_at_signal": 92.9,
+  "active": true,
+  "missing_streak": 0,
+  "ended_utc": null,
+  "reactivations": 0
+ },
+ {
+  "token_address": "0x020bfc650a365f8bb26819deaabf3e21291018b4",
+  "symbol": "CASHCAT",
+  "pool_address": "0xa70fc67c9f69da90b63a0e4c05d229954574e313",
+  "ds_url": "https://dexscreener.com/robinhood/0xa70fc67c9f69da90b63a0e4c05d229954574e313",
+  "first_seen_utc": "2026-07-14T21:15:14.888768+00:00",
+  "first_seen_local": "14/07/2026 23:17",
+  "price_at_signal": 0.164179957177169,
+  "price_at_signal_source": "prezzo live alla scansione del segnale",
+  "score_at_signal": 89.5,
+  "active": true,
+  "missing_streak": 0,
+  "ended_utc": null,
+  "reactivations": 0
+ },
+ {
   "token_address": "0x01637b14b7378b99de75a64d50656d98488d9a4d",
   "symbol": "MARIAN",
   "pool_address": "0xfe331fd29b54bce09d52988fa691e3b18b0a4081",
@@ -25,7 +55,7 @@
   "price_at_signal_source": "candela oraria GeckoTerminal (stima)",
   "score_at_signal": 84.4,
   "active": true,
-  "missing_streak": 2,
+  "missing_streak": 0,
   "ended_utc": null,
   "reactivations": 1
  },
@@ -39,9 +69,9 @@
   "price_at_signal": 0.0106789874596671,
   "price_at_signal_source": "candela oraria GeckoTerminal (stima)",
   "score_at_signal": 85.1,
-  "active": true,
-  "missing_streak": 2,
-  "ended_utc": null,
+  "active": false,
+  "missing_streak": 3,
+  "ended_utc": "2026-07-14T21:15:14.888768+00:00",
   "reactivations": 0
  }
 ]
