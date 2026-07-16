@@ -1,5 +1,20 @@
 [
  {
+  "token_address": "0x45242320dbb855eea8fd36804c6487e10e97fcf9",
+  "symbol": "TENDIES",
+  "pool_address": "0x237609918f330add285b8bc5f8f2922283d1c4c5",
+  "ds_url": "https://dexscreener.com/robinhood/0x237609918f330add285b8bc5f8f2922283d1c4c5",
+  "first_seen_utc": "2026-07-16T06:31:08.762073+00:00",
+  "first_seen_local": "16/07/2026 08:33",
+  "price_at_signal": 0.0134431399906077,
+  "price_at_signal_source": "prezzo live alla scansione del segnale",
+  "score_at_signal": 93.0,
+  "active": true,
+  "missing_streak": 0,
+  "ended_utc": null,
+  "reactivations": 0
+ },
+ {
   "token_address": "0x39dbed3a2bd333467115de45665cc57f813c4571",
   "symbol": "PONS",
   "pool_address": "0x10cc6bd38112cac182db90b6a71d8bb5939526ba",
@@ -10,7 +25,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 88.1,
   "active": false,
-  "missing_streak": 7,
+  "missing_streak": 8,
   "ended_utc": "2026-07-15T21:14:55.868644+00:00",
   "reactivations": 0
  },
@@ -25,7 +40,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 92.9,
   "active": false,
-  "missing_streak": 5,
+  "missing_streak": 6,
   "ended_utc": "2026-07-15T23:14:06.250202+00:00",
   "reactivations": 1
  },
@@ -55,7 +70,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 85.5,
   "active": false,
-  "missing_streak": 9,
+  "missing_streak": 10,
   "ended_utc": "2026-07-15T17:38:40.290578+00:00",
   "reactivations": 0
  },
@@ -85,7 +100,7 @@
   "price_at_signal_source": "candela oraria GeckoTerminal (stima)",
   "score_at_signal": 85.1,
   "active": false,
-  "missing_streak": 8,
+  "missing_streak": 9,
   "ended_utc": "2026-07-15T19:36:37.393908+00:00",
   "reactivations": 2
  }
