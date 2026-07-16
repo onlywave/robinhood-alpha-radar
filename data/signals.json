@@ -1,5 +1,20 @@
 [
  {
+  "token_address": "0x0339f5459fc690ac85f1782e15782a151b4a9e1b",
+  "symbol": "WALLET",
+  "pool_address": "0x9501a20bedb8bea0798fe5d4c411f5e270965d49",
+  "ds_url": "https://dexscreener.com/robinhood/0x9501a20bedb8bea0798fe5d4c411f5e270965d49",
+  "first_seen_utc": "2026-07-16T21:16:06.685942+00:00",
+  "first_seen_local": "16/07/2026 23:19",
+  "price_at_signal": 0.00573105793618286,
+  "price_at_signal_source": "prezzo live alla scansione del segnale",
+  "score_at_signal": 86.6,
+  "active": true,
+  "missing_streak": 0,
+  "ended_utc": null,
+  "reactivations": 0
+ },
+ {
   "token_address": "0x45242320dbb855eea8fd36804c6487e10e97fcf9",
   "symbol": "TENDIES",
   "pool_address": "0x237609918f330add285b8bc5f8f2922283d1c4c5",
@@ -25,7 +40,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 88.1,
   "active": false,
-  "missing_streak": 4,
+  "missing_streak": 5,
   "ended_utc": "2026-07-16T18:19:34.907111+00:00",
   "reactivations": 1
  },
@@ -40,7 +55,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 92.9,
   "active": false,
-  "missing_streak": 12,
+  "missing_streak": 13,
   "ended_utc": "2026-07-15T23:14:06.250202+00:00",
   "reactivations": 1
  },
@@ -55,7 +70,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 89.5,
   "active": true,
-  "missing_streak": 0,
+  "missing_streak": 1,
   "ended_utc": null,
   "reactivations": 0
  },
@@ -70,7 +85,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 85.5,
   "active": false,
-  "missing_streak": 16,
+  "missing_streak": 17,
   "ended_utc": "2026-07-15T17:38:40.290578+00:00",
   "reactivations": 0
  },
@@ -84,9 +99,9 @@
   "price_at_signal": 1.39233616224159,
   "price_at_signal_source": "candela oraria GeckoTerminal (stima)",
   "score_at_signal": 84.4,
-  "active": true,
-  "missing_streak": 2,
-  "ended_utc": null,
+  "active": false,
+  "missing_streak": 3,
+  "ended_utc": "2026-07-16T21:16:06.685942+00:00",
   "reactivations": 1
  },
  {
@@ -100,7 +115,7 @@
   "price_at_signal_source": "candela oraria GeckoTerminal (stima)",
   "score_at_signal": 85.1,
   "active": false,
-  "missing_streak": 15,
+  "missing_streak": 16,
   "ended_utc": "2026-07-15T19:36:37.393908+00:00",
   "reactivations": 2
  }
