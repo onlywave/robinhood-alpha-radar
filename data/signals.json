@@ -24,10 +24,10 @@
   "price_at_signal": 0.0143172092286897,
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 88.1,
-  "active": false,
-  "missing_streak": 9,
-  "ended_utc": "2026-07-15T21:14:55.868644+00:00",
-  "reactivations": 0
+  "active": true,
+  "missing_streak": 0,
+  "ended_utc": null,
+  "reactivations": 1
  },
  {
   "token_address": "0x77581054581b9c525e7dd7a0155de43867532d03",
@@ -40,7 +40,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 92.9,
   "active": false,
-  "missing_streak": 7,
+  "missing_streak": 8,
   "ended_utc": "2026-07-15T23:14:06.250202+00:00",
   "reactivations": 1
  },
@@ -70,7 +70,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 85.5,
   "active": false,
-  "missing_streak": 11,
+  "missing_streak": 12,
   "ended_utc": "2026-07-15T17:38:40.290578+00:00",
   "reactivations": 0
  },
@@ -85,7 +85,7 @@
   "price_at_signal_source": "candela oraria GeckoTerminal (stima)",
   "score_at_signal": 84.4,
   "active": true,
-  "missing_streak": 0,
+  "missing_streak": 1,
   "ended_utc": null,
   "reactivations": 1
  },
@@ -100,7 +100,7 @@
   "price_at_signal_source": "candela oraria GeckoTerminal (stima)",
   "score_at_signal": 85.1,
   "active": false,
-  "missing_streak": 10,
+  "missing_streak": 11,
   "ended_utc": "2026-07-15T19:36:37.393908+00:00",
   "reactivations": 2
  }
