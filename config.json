@@ -67,5 +67,31 @@
   "onchain_enrich_top": 10,
   "min_position_value_usd": 10,
   "max_candidates_shown": 25,
-  "history_max_points": 1000
+  "history_max_points": 1000,
+  "tracking": {
+    "path_max_points": 480,
+    "post_exit_track_hours": 168,
+    "holder_drop_6h_pct": -3.0,
+    "top10_rise_from_signal_pts": 8.0
+  },
+  "exit_plan": {
+    "hard_stop_pct": -35.0,
+    "time_stop_hours": 48,
+    "time_stop_min_gain_pct": 20.0,
+    "trail_activate_gain_pct": 50.0,
+    "trail_pct": 25.0,
+    "liquidity_floor_usd": 25000,
+    "liquidity_drop_pct": -60.0,
+    "stake_usd": 100.0,
+    "min_sample_recalibration": 20,
+    "kill_expectancy_n": 30
+  },
+  "smart_wallets": {
+    "early_window_hours": 30,
+    "winner_mfe_pct": 50.0,
+    "loser_pnl_pct": -35.0,
+    "min_winners_bought": 2,
+    "run_at_utc_hour": 2,
+    "max_early_buyers_per_token": 400
+  }
 }

@@ -30,6 +30,9 @@ try:
 except Exception:
     TZ = timezone.utc
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import track  # noqa: E402 — logica pura: path/MFE/MAE, uscite, paper portfolio
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG = json.load(open(os.path.join(ROOT, "config.json")))
 
@@ -331,7 +334,7 @@ def enrich_onchain(cands, prev_by_token):
         if holders and isinstance(holders, dict) and oc["total_supply"]:
             pool = (c.get("pool_address") or "").lower()
             creator = (oc["creator"] or "").lower()
-            shares = []
+            shares, holder_addrs = [], []
             for it in holders.get("items", []):
                 a = it.get("address") or {}
                 h = (a.get("hash") or "").lower()
@@ -340,12 +343,15 @@ def enrich_onchain(cands, prev_by_token):
                     continue
                 if a.get("is_contract") and "pool" in name.lower():
                     continue
+                if not a.get("is_contract"):
+                    holder_addrs.append(h)  # per incrocio smart-wallet
                 share = 100 * fnum(it.get("value")) / oc["total_supply"]
                 if h == creator:
                     oc["creator_share_pct"] = round(share, 2)
                 shares.append(share)
             if shares:
                 oc["top10_adjusted_pct"] = round(sum(shares[:10]), 1)
+            c["_holder_addrs"] = holder_addrs
 
         prev_oc = (prev_by_token.get(ta) or {}).get("onchain") or {}
         prev_h = prev_oc.get("holders_count")
@@ -991,10 +997,39 @@ def load_previous(out_dir):
 
 
 SIGNALS_CANONICAL = os.path.join(ROOT, "data", "signals.json")
+SMART_WALLETS_PATH = os.path.join(ROOT, "data", "smart_wallets.json")
 # campi ricalcolati a ogni scansione: restano solo nella copia pubblicata,
 # così il file canonico committato cambia solo a eventi strutturali
+# (path/MFE/MAE/paper sono invece CANONICI: sono la memoria degli esiti)
 SIGNALS_VOLATILE = {"price_now", "price_checked_utc", "change_pct",
                     "last_seen_utc", "score_last"}
+
+
+def signal_onchain(ta, pool):
+    """Holder count + top-10 aggiustata per UN segnale attivo (fetch leggero,
+    usato dal tracking di degrado — pochi segnali attivi per scansione)."""
+    explorer = CONFIG["primary_chain"]["explorer"].rstrip("/")
+    holders_count, supply, top10 = None, None, None
+    tk = bs_json(f"{explorer}/api/v2/tokens/{ta}", retries=2)
+    if tk and isinstance(tk, dict):
+        holders_count = int(fnum(tk.get("holders_count")
+                                 or tk.get("holders"), 0)) or None
+        supply = fnum(tk.get("total_supply"), None)
+    hs = bs_json(f"{explorer}/api/v2/tokens/{ta}/holders", retries=2)
+    if hs and isinstance(hs, dict) and supply:
+        pool_l = (pool or "").lower()
+        shares = []
+        for it in hs.get("items", []):
+            a = it.get("address") or {}
+            h = (a.get("hash") or "").lower()
+            if h in BURN_ADDRS or h == ta or h == pool_l:
+                continue
+            if a.get("is_contract") and "pool" in (a.get("name") or "").lower():
+                continue
+            shares.append(100 * fnum(it.get("value")) / supply)
+        if shares:
+            top10 = round(sum(shares[:10]), 1)
+    return holders_count, top10
 
 
 def update_signals(buys, out_dir, now):
@@ -1063,9 +1098,9 @@ def update_signals(buys, out_dir, now):
                 s["active"] = False
                 s["ended_utc"] = now_iso
 
-    # prezzo corrente per TUTTI i segnali storici (batch DexScreener da 30)
+    # prezzo E liquidità correnti per TUTTI i segnali storici (batch da 30)
     addrs = [s["token_address"] for s in sig]
-    prices = {}
+    prices = {}  # ta -> (px, liq)
     for i in range(0, len(addrs), 30):
         chunk = addrs[i:i + 30]
         d = http_json(f"https://api.dexscreener.com/tokens/v1/"
@@ -1076,15 +1111,36 @@ def update_signals(buys, out_dir, now):
             liq = fnum((p.get("liquidity") or {}).get("usd"))
             if ta and (ta not in best or liq > best[ta][0]):
                 best[ta] = (liq, fnum(p.get("priceUsd"), None))
-        prices.update({k: v[1] for k, v in best.items()})
+        prices.update({k: (v[1], v[0]) for k, v in best.items()})
+
+    tcfg = CONFIG["tracking"]
+    xcfg = CONFIG["exit_plan"]
     for s in sig:
-        px = prices.get(s["token_address"])
+        px, liq = prices.get(s["token_address"], (None, None))
         if px is not None:
             s["price_now"] = px
             s["price_checked_utc"] = now_iso
             if s.get("price_at_signal"):
                 s["change_pct"] = round(
                     100 * (px / float(s["price_at_signal"]) - 1), 2)
+        track.append_path(s, px, liq, now, tcfg)
+
+    # tracking on-chain (holder/top-10) SOLO per i segnali attivi: rileva il
+    # degrado prima che lo faccia il prezzo (uscita signal-based)
+    for s in sig:
+        if not s.get("active"):
+            continue
+        h, t10 = signal_onchain(s["token_address"], s.get("pool_address"))
+        track.update_onchain_track(s, h, t10, now, tcfg)
+
+    # replay del piano di uscita + paper portfolio ($100 virtuali a segnale)
+    for s in sig:
+        paper = track.replay_paper(s, xcfg)
+        s["paper"] = track.finalize_stale(s, paper, now, tcfg, xcfg)
+    paper_book = track.portfolio(sig, xcfg, now)
+    with open(os.path.join(out_dir, "paper.json"), "w") as f:
+        json.dump(paper_book, f, ensure_ascii=False, indent=1)
+
     sig.sort(key=lambda s: s.get("first_seen_utc") or "", reverse=True)
     with open(os.path.join(out_dir, "signals.json"), "w") as f:
         json.dump(sig, f, ensure_ascii=False, indent=1)
@@ -1094,7 +1150,7 @@ def update_signals(buys, out_dir, now):
     with open(SIGNALS_CANONICAL, "w") as f:
         json.dump(canon, f, ensure_ascii=False, indent=1)
         f.write("\n")
-    return sig
+    return sig, paper_book
 
 
 def compute_deltas(current, previous):
@@ -1169,15 +1225,90 @@ def main():
     screened = screened[:CONFIG["max_candidates_shown"]]
     buys = [c for c in screened if c["classification"] == "ALPHA BUY ALERT"]
 
-    print("[4/7] Watchlist handoff (DexScreener)…")
+    # incrocio smart-wallet: quanti wallet "provati" sono tra i top holder
+    smart_set, smart_info = set(), None
+    try:
+        sw = json.load(open(SMART_WALLETS_PATH))
+        smart_set = {w["address"] for w in sw.get("wallets", [])}
+        smart_info = {"built_utc": sw.get("built_utc"),
+                      "n_wallets": len(sw.get("wallets", [])),
+                      "tokens": sw.get("tokens")}
+    except Exception:
+        pass
+    for c in screened:
+        addrs = c.pop("_holder_addrs", None)
+        if addrs is not None and smart_set:
+            matched = [a for a in addrs if a in smart_set]
+            c["smart_wallets_holding"] = len(matched)
+            c["smart_wallets_matched"] = [a[:10] + "…" for a in matched[:5]]
+
+    print("[4/8] Registro segnali, tracking percorso e paper portfolio…")
+    signals, paper_book = update_signals(buys, out_dir, now)
+    print(f"[signals] registro: {len(signals)} segnali "
+          f"({sum(1 for s in signals if s.get('active'))} attivi) · paper: "
+          f"{paper_book['stats']['n_closed']} chiusi, "
+          f"{paper_book['stats']['n_open']} aperti")
+
+    # profilo smart-wallet: ricostruzione giornaliera (o forzata via env)
+    swcfg = CONFIG["smart_wallets"]
+    if os.environ.get("SMART_WALLETS") == "1" or now.hour == swcfg["run_at_utc_hour"]:
+        try:
+            import smart_wallets as swmod
+            prof = swmod.build(signals, CONFIG, rpc_call, now)
+            with open(SMART_WALLETS_PATH, "w") as f:
+                json.dump(prof, f, ensure_ascii=False, indent=1)
+                f.write("\n")
+            smart_info = {"built_utc": prof["built_utc"],
+                          "n_wallets": len(prof["wallets"]),
+                          "tokens": prof["tokens"]}
+            print(f"[smart] profilo ricostruito: {len(prof['wallets'])} wallet "
+                  f"qualificati su {prof['n_early_wallets_seen']} osservati")
+        except Exception as e:
+            print(f"[warn] smart-wallet build fallita: {e}", file=sys.stderr)
+    if os.path.exists(SMART_WALLETS_PATH):
+        with open(SMART_WALLETS_PATH) as f_in, \
+                open(os.path.join(out_dir, "smart_wallets.json"), "w") as f_out:
+            f_out.write(f_in.read())
+
+    print("[5/8] Watchlist handoff (DexScreener)…")
     watchlist = fetch_watchlist()
 
-    print("[5/7] Wallet monitorati (Blockscout + RPC) + valutazione posizioni…")
+    print("[6/8] Wallet monitorati (Blockscout + RPC) + valutazione posizioni…")
     wallets = [fetch_wallet(w) for w in CONFIG.get("wallets", [])]
     for w in wallets:
         assess_positions(w, screened, scr, weights, bridge_flow, prev_by_token)
 
-    print("[6/7] Radar globale chain secondarie (GeckoTerminal)…")
+    # posizioni che coincidono con segnali del registro: aggiungi il piano di
+    # uscita paper (informativo, mai un ordine — la decisione resta all'utente)
+    xp = CONFIG["exit_plan"]
+    sig_by_ta = {s["token_address"]: s for s in signals}
+    for w in wallets:
+        for a in w.get("position_assessments", []):
+            s = sig_by_ta.get(a.get("token_address"))
+            if not s:
+                continue
+            p = s.get("paper") or {}
+            hint = []
+            if s.get("degraded"):
+                hint.append(f"⚠ degrado on-chain: {s.get('degraded_reason')}")
+            if p.get("status") == "aperto":
+                if p.get("trail_armed") and p.get("trail_stop_px"):
+                    hint.append(
+                        f"trailing ARMATO: stop paper ${p['trail_stop_px']:.6g} "
+                        f"({xp['trail_pct']:.0f}% dal picco ${p.get('peak_px', 0):.6g})")
+                else:
+                    hint.append("trailing non ancora armato (si arma a "
+                                f"+{xp['trail_activate_gain_pct']:.0f}%)")
+                if p.get("hard_stop_px"):
+                    hint.append(f"hard stop paper ${p['hard_stop_px']:.6g}")
+            elif p.get("status") == "chiuso":
+                hint.append(f"il piano paper è già USCITO: {p.get('exit_reason')} "
+                            f"a ${p.get('exit_px', 0):.6g} ({p.get('pnl_pct')}%)")
+            if hint:
+                a["exit_hint"] = ("Piano di uscita del radar (paper, non un "
+                                  "ordine): " + " · ".join(hint))
+
+    print("[7/8] Radar globale chain secondarie (GeckoTerminal)…")
     global_radar = []
     for net in CONFIG["secondary_networks"]:
         npools, ninc = gt_pools(net["geckoterminal_id"], "new_pools")
@@ -1193,11 +1324,8 @@ def main():
                              "new_pools_seen": len(npools),
                              "candidates": kept[:5]})
 
-    print("[7/7] Delta, registro segnali e storico…")
+    print("[8/8] Delta e storico…")
     deltas = compute_deltas(screened, previous)
-    signals = update_signals(buys, out_dir, now)
-    print(f"[signals] registro: {len(signals)} segnali "
-          f"({sum(1 for s in signals if s.get('active'))} attivi)")
 
     history.append({
         "ts": now.isoformat(),
@@ -1240,6 +1368,9 @@ def main():
         "wallets": wallets,
         "global_radar": global_radar,
         "deltas": deltas,
+        "paper_summary": {"stats": paper_book["stats"],
+                          "verdict": paper_book["verdict"]},
+        "smart_wallets_info": smart_info,
         "scan_health": {
             "duration_s": round(time.time() - t0, 1),
             "blockscout_degraded": BS_FAILS[0] >= 8,

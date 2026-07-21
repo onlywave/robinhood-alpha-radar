@@ -22,6 +22,20 @@ nessuna API key: solo fonti pubbliche gratuite.
   (`balanceOf`, `symbol()`, `eth_getLogs`)
 - **Delta tra scansioni**: entrati / usciti / riclassificati
 - **Radar globale**: nuovi pool oltre screening sulle chain secondarie
+- **Tracking del percorso di ogni segnale** (`scanner/track.py`): campione orario
+  prezzo+liquidità nel registro, MFE/MAE ancorati all'ingresso, tracking on-chain
+  (holder/top-10) dei segnali attivi con rilevazione del **degrado**
+- **Paper portfolio** (`data/paper.json` pubblicato): $100 virtuali su ogni segnale
+  con piano di uscita a priorità — hard stop −35% · liquidità deteriorata ·
+  degrado holder · trailing 25% dal picco (armato oltre +50%) · time stop 48h
+  sotto +20%. Expectancy/win-rate in dashboard con criterio dichiarato:
+  &lt;20 segnali nessuna conclusione; a 30 segnali con expectancy ≤0 il radar
+  resta SOLO intelligence
+- **Smart-wallet layer** (`scanner/smart_wallets.py`, ricostruito ogni notte):
+  early buyer dei segnali vincitori vs perdenti (transfer dal pool nella finestra
+  pre-segnale, punteggio differenziale W−L, contratti esclusi); la dashboard
+  mostra quanti smart-wallet sono tra i top holder di ogni candidato.
+  Backfill storico una tantum: `scripts/backfill_paths.py` (OHLCV GeckoTerminal)
 
 ## BUY ALERT automatici (v2) e loro limiti
 

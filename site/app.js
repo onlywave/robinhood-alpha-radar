@@ -162,7 +162,8 @@ function renderBuyAlerts(d) {
           <div class="d">${fmtN(oc.holders_count)} holder
           ${oc.holders_growth_pct_1h !== null && oc.holders_growth_pct_1h !== undefined ? `(${fmtPct(oc.holders_growth_pct_1h, 2)}/h)` : ""} ·
           top-10 adj ${oc.top10_adjusted_pct ?? "N/D"}% ·
-          deployer ${oc.creator_share_pct !== null && oc.creator_share_pct !== undefined ? oc.creator_share_pct + "%" : "fuori top-50 (<1%)"}</div></div>
+          deployer ${oc.creator_share_pct !== null && oc.creator_share_pct !== undefined ? oc.creator_share_pct + "%" : "fuori top-50 (<1%)"}
+          ${c.smart_wallets_holding !== undefined ? `· 💡 ${c.smart_wallets_holding} smart-wallet` : ""}</div></div>
         <div class="card"><div class="k">Sicurezza</div>
           <div class="d">owner: ${esc(oc.owner_status || "N/D")} ·
           contratto ${oc.contract_verified ? "verificato ✓" : "NON verificato"} ·
@@ -270,6 +271,7 @@ function renderWallets(d) {
             owner ${esc(a.owner_status || "N/D")}</span>` : ""}
         </div>
         <p class="assess-comment">${esc(a.comment)}</p>
+        ${a.exit_hint ? `<p class="assess-comment">📐 ${esc(a.exit_hint)}</p>` : ""}
       </div>`).join("")}` : ""}
       <h3 style="margin-top:16px">Operazioni recenti <span class="tag fact">eventi Transfer on-chain</span></h3>
       <div class="table-wrap"><table>
@@ -310,10 +312,13 @@ function renderCandidates(d) {
     const missingHtml = c.classification !== "ALPHA BUY ALERT" && missing.length
       ? `<span class="cov" title="${esc(missing.join("\n"))}">manca per BUY: ${missing.length} req.</span>` : "";
     const oc = c.onchain || {};
+    const smartLine = c.smart_wallets_holding !== undefined
+      ? `<span class="oc-line ${c.smart_wallets_holding > 0 ? "up" : ""}" title="wallet che hanno comprato presto ≥2 segnali vincitori (lista ricostruita ogni notte)${(c.smart_wallets_matched || []).length ? ": " + c.smart_wallets_matched.join(", ") : ""}">💡 ${c.smart_wallets_holding} smart-wallet dentro</span>`
+      : "";
     const onchain = c.onchain
       ? `<span class="oc-line">${fmtN(oc.holders_count)} hold${oc.holders_growth_pct_1h !== null && oc.holders_growth_pct_1h !== undefined ? ` <span class="${oc.holders_growth_pct_1h >= 0 ? "up" : "down"}">${fmtPct(oc.holders_growth_pct_1h, 1)}/h</span>` : ""}</span>
          <span class="oc-line">top10 ${oc.top10_adjusted_pct ?? "N/D"}%</span>
-         <span class="oc-line">${oc.contract_verified === true ? "✓ verif." : oc.contract_verified === false ? "✗ non verif." : "verif. N/D"} · ${oc.owner_status ? (oc.owner_status.startsWith("attivo") ? "owner attivo" : "owner " + esc(oc.owner_status)) : "owner N/D"}</span>`
+         <span class="oc-line">${oc.contract_verified === true ? "✓ verif." : oc.contract_verified === false ? "✗ non verif." : "verif. N/D"} · ${oc.owner_status ? (oc.owner_status.startsWith("attivo") ? "owner attivo" : "owner " + esc(oc.owner_status)) : "owner N/D"}</span>${smartLine}`
       : `<span class="cov">non arricchito</span>`;
     const score = c.score_norm ?? c.score_partial;
     const chg = c.chg_h24;
@@ -407,8 +412,27 @@ function renderGlobal(d) {
 const fmtPx = (v) => (v === null || v === undefined) ? "N/D"
   : "$" + Number(v).toPrecision(4);
 
+function paperCell(s) {
+  const p = s.paper;
+  if (!p || p.status === "non valutabile") return `<span class="cov">N/D</span>`;
+  const pnl = p.pnl_pct;
+  const cls = pnl > 0 ? "up" : pnl < 0 ? "down" : "";
+  if (p.status === "chiuso") {
+    return `<span class="${cls}">${fmtPct(pnl, 1)}</span>
+      <span class="cov">${esc(p.exit_reason || "")} · ${Math.round(p.hold_hours || 0)}h</span>`;
+  }
+  const trail = p.trail_armed && p.trail_stop_px
+    ? `trailing armato: stop ${fmtPx(p.trail_stop_px)}`
+    : `trailing non armato (arma a +50%)`;
+  return `<span class="${cls}">${fmtPct(pnl, 1)}</span>
+    <span class="cov" title="hard stop ${fmtPx(p.hard_stop_px)}">aperto · ${esc(trail)}</span>`;
+}
+
 function signalRow(s) {
   const chg = s.change_pct;
+  const mfeMae = (s.mfe_pct !== undefined && s.mfe_pct !== null)
+    ? `<span class="up">${fmtPct(s.mfe_pct, 0)}</span> / <span class="down">${fmtPct(s.mae_pct, 0)}</span>`
+    : `<span class="cov">in raccolta</span>`;
   return `<tr>
     <td class="num">${esc(s.first_seen_local || (s.first_seen_utc || "").slice(0, 16))}</td>
     <td class="tok"><a href="${esc(s.ds_url || "#")}" target="_blank" rel="noopener">${esc(s.symbol)}</a></td>
@@ -417,10 +441,44 @@ function signalRow(s) {
     <td class="num" data-pxnow="${esc(s.token_address)}">${fmtPx(s.price_now)}</td>
     <td class="num ${chg > 0 ? "up" : chg < 0 ? "down" : ""}" data-chg="${esc(s.token_address)}"
       data-base="${s.price_at_signal ?? ""}">${fmtPct(chg, 1)}</td>
+    <td class="num">${mfeMae}</td>
+    <td>${paperCell(s)}</td>
     <td>${s.active
       ? `<span class="badge hpw">ATTIVO</span>${s.reactivations ? ` <span class="cov">riattivato ×${s.reactivations}</span>` : ""}`
-      : `<span class="badge disc">cessato</span> <span class="cov">${esc((s.ended_utc || "").slice(0, 16).replace("T", " "))}</span>`}</td>
+      : `<span class="badge disc">cessato</span> <span class="cov">${esc((s.ended_utc || "").slice(0, 16).replace("T", " "))}</span>`}
+      ${s.degraded ? `<span class="flag" title="${esc(s.degraded_reason || "")}">⚠ degrado</span>` : ""}</td>
   </tr>`;
+}
+
+async function renderPaper() {
+  const el = document.getElementById("paper-content");
+  if (!el) return;
+  let p;
+  try {
+    p = await (await fetch(`data/paper.json?cb=${Date.now()}`)).json();
+  } catch (e) {
+    el.innerHTML = `<span class="empty">pagella non ancora pubblicata (arriva con la prossima scansione)</span>`;
+    return;
+  }
+  const st = p.stats || {};
+  const exp = st.expectancy_mtm_pct;
+  const cards = [
+    ["Segnali valutati", `${st.n_signals ?? 0} (${st.n_closed ?? 0} chiusi, ${st.n_open ?? 0} aperti)`, "fact"],
+    ["Win rate (chiusi)", st.win_rate_closed_pct !== null && st.win_rate_closed_pct !== undefined ? `${st.win_rate_closed_pct}%` : "N/D", "fact"],
+    ["Expectancy per segnale", exp !== null && exp !== undefined ? fmtPct(exp, 1) : "N/D", "inf"],
+    ["Profit factor", st.profit_factor ?? "N/D", "inf"],
+    ["Migliore / peggiore", `${fmtPct(st.best_pct, 0)} / ${fmtPct(st.worst_pct, 0)}`, "fact"],
+    ["PnL totale simulato", st.total_pnl_usd !== undefined ? fmtUSD(st.total_pnl_usd, false) : "N/D", "inf"],
+  ];
+  el.innerHTML = `<div class="panel">
+    <div class="cards">${cards.map(([k, v, t]) =>
+      `<div class="card"><div class="k">${k} <span class="tag ${t}">${t === "fact" ? "fatto" : "inferenza"}</span></div><div class="v">${v}</div></div>`).join("")}
+    </div>
+    <div class="warn-box">🧭 <strong>Verdetto automatico:</strong> ${esc(p.verdict || "")}</div>
+    <p class="cov" style="margin:8px 0 0">Regole: hard stop ${p.rules?.hard_stop_pct}% ·
+      liquidità (${esc(p.rules?.liquidity || "")}) · degrado holder · trailing (${esc(p.rules?.trailing || "")}) ·
+      time stop (${esc(p.rules?.time_stop || "")}). ${esc(p.rules?.nota || "")}</p>
+  </div>`;
 }
 
 async function renderSignals() {
@@ -430,7 +488,7 @@ async function renderSignals() {
     sig = await (await fetch(`data/signals.json?cb=${Date.now()}`)).json();
   } catch (e) { /* registro non ancora pubblicato */ }
   if (!sig.length) {
-    tb.innerHTML = `<tr><td colspan="7" class="empty">Nessun segnale registrato finora.
+    tb.innerHTML = `<tr><td colspan="9" class="empty">Nessun segnale registrato finora.
       Il registro parte dal primo ALPHA BUY ALERT emesso.</td></tr>`;
     return;
   }
@@ -499,6 +557,7 @@ async function main() {
   renderStatus(d);
   renderBuyAlerts(d);
   renderSignals();
+  renderPaper();
   renderWallets(d);
   renderCandidates(d);
   renderWatchlist(d);

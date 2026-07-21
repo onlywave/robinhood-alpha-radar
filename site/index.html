@@ -53,18 +53,28 @@
     <h3 style="margin-top:22px">📜 Storico dei segnali generati
       <span class="tag fact">registro permanente</span>
       <span class="tag est">prezzi aggiornati live</span></h3>
-    <p class="hint">Ogni segnale d'acquisto mai emesso dal radar, con data/ora, prezzo al momento
-      del segnale e prezzo attuale: la pagella pubblica e verificabile del sistema. Un segnale è
-      "cessato" quando il token non supera più i gate per 3 scansioni consecutive.</p>
+    <p class="hint">Ogni segnale d'acquisto mai emesso dal radar, con prezzo al segnale, prezzo
+      attuale, escursione massima favorevole/avversa (MFE/MAE) e l'esito che avrebbe avuto il
+      piano di uscita automatico. Un segnale è "cessato" quando il token non supera più i gate
+      per 3 scansioni consecutive; "degrado" = holder in calo o concentrazione in aumento.</p>
     <div class="table-wrap">
       <table id="signals-table">
         <thead><tr>
           <th>Primo segnale (Zurich)</th><th>Token</th><th>Score</th>
-          <th>Prezzo al segnale</th><th>Prezzo attuale</th><th>Δ dal segnale</th><th>Stato</th>
+          <th>Prezzo al segnale</th><th>Prezzo attuale</th><th>Δ dal segnale</th>
+          <th>MFE / MAE</th><th>Esito paper</th><th>Stato</th>
         </tr></thead>
         <tbody></tbody>
       </table>
     </div>
+    <h3 style="margin-top:22px">🧪 Pagella del radar — paper portfolio
+      <span class="tag inf">$100 virtuali per segnale, regole di uscita automatiche</span></h3>
+    <p class="hint">Il radar si dà i voti da solo: su ogni segnale emesso simula $100 con un
+      piano di uscita fisso (hard stop −35% · uscita se liquidità deteriorata · uscita su
+      degrado holder · trailing 25% dal picco una volta oltre +50% · time stop 48h sotto +20%).
+      Stime su campioni orari, senza slippage. Criterio dichiarato: sotto 20 segnali nessuna
+      conclusione; a 30 segnali con expectancy ≤0 il radar resta solo intelligence, per sempre.</p>
+    <div id="paper-content"></div>
   </section>
 
   <section id="portfolio">
@@ -156,6 +166,11 @@
           <li>contratto verificato, owner()/renounce, deployer e sua quota (Blockscout + RPC)</li>
           <li>holder count, crescita holder, concentrazione top-10 aggiustata (esclusi pool/burn)</li>
           <li>sellability empirica: vendite reali osservate on-chain nelle 24h</li>
+          <li>percorso prezzo di ogni segnale (campione orario): MFE/MAE, degrado holder,
+            esito del piano di uscita paper</li>
+          <li>smart-wallet: chi ha comprato presto ≥2 segnali vincitori e più vincitori che
+            perdenti (punteggio W−L, contratti esclusi) — ricostruito ogni notte, indicativo
+            finché i token etichettati sono pochi</li>
           <li>GoPlus security quando la chain sarà supportata (oggi N/D su 4663)</li>
         </ul>
         <h3>Cosa resta manuale</h3>
