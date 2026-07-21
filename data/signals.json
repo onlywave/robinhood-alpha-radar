@@ -10,7 +10,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 86.6,
   "active": false,
-  "missing_streak": 16,
+  "missing_streak": 17,
   "ended_utc": "2026-07-20T11:12:42.787071+00:00",
   "reactivations": 1,
   "path": [
@@ -583,6 +583,11 @@
     "2026-07-21T14:21",
     0.005057,
     540271.0
+   ],
+   [
+    "2026-07-21T16:40",
+    0.00485,
+    527166.0
    ]
   ],
   "peak_px": 0.0111721605160641,
@@ -613,7 +618,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 93.0,
   "active": true,
-  "missing_streak": 0,
+  "missing_streak": 1,
   "ended_utc": null,
   "reactivations": 0,
   "path": [
@@ -1261,6 +1266,11 @@
     "2026-07-21T14:21",
     0.01422,
     958371.0
+   ],
+   [
+    "2026-07-21T16:40",
+    0.01365,
+    944868.0
    ]
   ],
   "peak_px": 0.0349284046202651,
@@ -1293,6 +1303,11 @@
    [
     "2026-07-21T14:21",
     9251,
+    11.9
+   ],
+   [
+    "2026-07-21T16:40",
+    9243,
     11.9
    ]
   ]
@@ -2076,6 +2091,11 @@
     "2026-07-21T14:21",
     0.03899,
     1182065.0
+   ],
+   [
+    "2026-07-21T16:40",
+    0.03459,
+    1192017.0
    ]
   ],
   "peak_px": 0.0423464999555855,
@@ -2109,6 +2129,11 @@
     "2026-07-21T14:21",
     11537,
     10.3
+   ],
+   [
+    "2026-07-21T16:40",
+    11775,
+    10.3
    ]
   ]
  },
@@ -2123,7 +2148,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 92.9,
   "active": false,
-  "missing_streak": 74,
+  "missing_streak": 75,
   "ended_utc": "2026-07-15T23:14:06.250202+00:00",
   "reactivations": 1,
   "path": [
@@ -2936,6 +2961,11 @@
     "2026-07-21T14:21",
     0.002189,
     184978.0
+   ],
+   [
+    "2026-07-21T16:40",
+    0.002122,
+    180975.0
    ]
   ],
   "peak_px": 0.00758472020056847,
@@ -2966,7 +2996,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 89.5,
   "active": true,
-  "missing_streak": 0,
+  "missing_streak": 1,
   "ended_utc": null,
   "reactivations": 2,
   "path": [
@@ -3779,6 +3809,11 @@
     "2026-07-21T14:21",
     0.07446,
     3643201.0
+   ],
+   [
+    "2026-07-21T16:40",
+    0.07204,
+    3575075.0
    ]
   ],
   "peak_px": 0.172471238342806,
@@ -3812,6 +3847,11 @@
     "2026-07-21T14:21",
     33309,
     12.9
+   ],
+   [
+    "2026-07-21T16:40",
+    33268,
+    12.9
    ]
   ]
  },
@@ -3826,7 +3866,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 85.5,
   "active": false,
-  "missing_streak": 78,
+  "missing_streak": 79,
   "ended_utc": "2026-07-15T17:38:40.290578+00:00",
   "reactivations": 0,
   "path": [
@@ -4659,14 +4699,19 @@
     "2026-07-21T14:21",
     0.001458,
     169088.0
+   ],
+   [
+    "2026-07-21T16:40",
+    0.001304,
+    159284.0
    ]
   ],
   "peak_px": 0.00933420827368726,
   "peak_utc": "2026-07-14T20:00",
-  "trough_px": 0.00133736668154427,
-  "trough_utc": "2026-07-20T23:00",
+  "trough_px": 0.001304,
+  "trough_utc": "2026-07-21T16:40",
   "mfe_pct": 215.8,
-  "mae_pct": -54.7,
+  "mae_pct": -55.9,
   "path_backfilled": true,
   "paper": {
    "status": "chiuso",
@@ -4689,7 +4734,7 @@
   "price_at_signal_source": "candela oraria GeckoTerminal (stima)",
   "score_at_signal": 84.4,
   "active": false,
-  "missing_streak": 32,
+  "missing_streak": 33,
   "ended_utc": "2026-07-19T06:42:56.731377+00:00",
   "reactivations": 4,
   "path": [
@@ -5622,6 +5667,11 @@
     "2026-07-21T14:21",
     0.7932,
     253132.0
+   ],
+   [
+    "2026-07-21T16:40",
+    0.7964,
+    253637.0
    ]
   ],
   "peak_px": 2.9989500457923,
@@ -5652,7 +5702,7 @@
   "price_at_signal_source": "candela oraria GeckoTerminal (stima)",
   "score_at_signal": 85.1,
   "active": false,
-  "missing_streak": 77,
+  "missing_streak": 78,
   "ended_utc": "2026-07-15T19:36:37.393908+00:00",
   "reactivations": 2,
   "path": [
@@ -6615,6 +6665,11 @@
     "2026-07-21T14:21",
     0.001586,
     170296.0
+   ],
+   [
+    "2026-07-21T16:40",
+    0.001458,
+    163076.0
    ]
   ],
   "peak_px": 0.0130371095827503,
