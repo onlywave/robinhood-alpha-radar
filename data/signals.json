@@ -9,10 +9,10 @@
   "price_at_signal": 0.00573105793618286,
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 86.6,
-  "active": false,
-  "missing_streak": 30,
-  "ended_utc": "2026-07-20T11:12:42.787071+00:00",
-  "reactivations": 1,
+  "active": true,
+  "missing_streak": 0,
+  "ended_utc": null,
+  "reactivations": 2,
   "path": [
    [
     "2026-07-16T22:00",
@@ -653,6 +653,11 @@
     "2026-07-22T20:21",
     0.006574,
     627485.0
+   ],
+   [
+    "2026-07-22T22:16",
+    0.006604,
+    629978.0
    ]
   ],
   "peak_px": 0.0111721605160641,
@@ -670,7 +675,14 @@
    "hold_hours": 6.7,
    "pnl_pct": -36.0,
    "trail_armed": false
-  }
+  },
+  "onchain_track": [
+   [
+    "2026-07-22T22:16",
+    4722,
+    15.6
+   ]
+  ]
  },
  {
   "token_address": "0x45242320dbb855eea8fd36804c6487e10e97fcf9",
@@ -683,7 +695,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 93.0,
   "active": true,
-  "missing_streak": 1,
+  "missing_streak": 0,
   "ended_utc": null,
   "reactivations": 1,
   "path": [
@@ -1401,6 +1413,11 @@
     "2026-07-22T20:21",
     0.009674,
     764627.0
+   ],
+   [
+    "2026-07-22T22:16",
+    0.0106,
+    808578.0
    ]
   ],
   "peak_px": 0.0349284046202651,
@@ -1499,6 +1516,11 @@
     "2026-07-22T20:21",
     9546,
     12.3
+   ],
+   [
+    "2026-07-22T22:16",
+    9656,
+    12.4
    ]
   ]
  },
@@ -1513,7 +1535,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 88.1,
   "active": false,
-  "missing_streak": 4,
+  "missing_streak": 5,
   "ended_utc": "2026-07-22T18:33:59.981775+00:00",
   "reactivations": 6,
   "path": [
@@ -2351,6 +2373,11 @@
     "2026-07-22T20:21",
     0.02828,
     1280180.0
+   ],
+   [
+    "2026-07-22T22:16",
+    0.03129,
+    1334887.0
    ]
   ],
   "peak_px": 0.0423464999555855,
@@ -2458,7 +2485,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 92.9,
   "active": false,
-  "missing_streak": 88,
+  "missing_streak": 89,
   "ended_utc": "2026-07-15T23:14:06.250202+00:00",
   "reactivations": 1,
   "path": [
@@ -3341,6 +3368,11 @@
     "2026-07-22T20:21",
     0.001325,
     141902.0
+   ],
+   [
+    "2026-07-22T22:16",
+    0.001452,
+    149213.0
    ]
   ],
   "peak_px": 0.00758472020056847,
@@ -3370,10 +3402,10 @@
   "price_at_signal": 0.164179957177169,
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 89.5,
-  "active": false,
-  "missing_streak": 4,
-  "ended_utc": "2026-07-22T18:33:59.981775+00:00",
-  "reactivations": 3,
+  "active": true,
+  "missing_streak": 0,
+  "ended_utc": null,
+  "reactivations": 4,
   "path": [
    [
     "2026-07-14T22:00",
@@ -4254,6 +4286,11 @@
     "2026-07-22T20:21",
     0.05267,
     3138785.0
+   ],
+   [
+    "2026-07-22T22:16",
+    0.05461,
+    3293690.0
    ]
   ],
   "peak_px": 0.172471238342806,
@@ -4322,6 +4359,11 @@
     "2026-07-22T16:45",
     33368,
     12.8
+   ],
+   [
+    "2026-07-22T22:16",
+    33432,
+    12.8
    ]
   ]
  },
@@ -4336,7 +4378,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 85.5,
   "active": false,
-  "missing_streak": 92,
+  "missing_streak": 93,
   "ended_utc": "2026-07-15T17:38:40.290578+00:00",
   "reactivations": 0,
   "path": [
@@ -5259,7 +5301,7 @@
   "price_at_signal_source": "candela oraria GeckoTerminal (stima)",
   "score_at_signal": 84.4,
   "active": false,
-  "missing_streak": 46,
+  "missing_streak": 47,
   "ended_utc": "2026-07-19T06:42:56.731377+00:00",
   "reactivations": 4,
   "path": [
@@ -6262,14 +6304,19 @@
     "2026-07-22T20:21",
     0.8034,
     258332.0
+   ],
+   [
+    "2026-07-22T22:16",
+    0.7505,
+    250159.0
    ]
   ],
   "peak_px": 2.9989500457923,
   "peak_utc": "2026-07-15T00:00",
-  "trough_px": 0.7848,
-  "trough_utc": "2026-07-21T12:11",
+  "trough_px": 0.7505,
+  "trough_utc": "2026-07-22T22:16",
   "mfe_pct": 115.4,
-  "mae_pct": -43.6,
+  "mae_pct": -46.1,
   "path_backfilled": true,
   "paper": {
    "status": "chiuso",
@@ -6292,7 +6339,7 @@
   "price_at_signal_source": "candela oraria GeckoTerminal (stima)",
   "score_at_signal": 85.1,
   "active": false,
-  "missing_streak": 91,
+  "missing_streak": 92,
   "ended_utc": "2026-07-15T19:36:37.393908+00:00",
   "reactivations": 2,
   "path": [
