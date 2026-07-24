@@ -10,7 +10,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 87.3,
   "active": false,
-  "missing_streak": 12,
+  "missing_streak": 13,
   "ended_utc": "2026-07-24T00:10:43.879240+00:00",
   "reactivations": 0,
   "path": [
@@ -98,6 +98,11 @@
     "2026-07-24T21:20",
     0.007576,
     284796.0
+   ],
+   [
+    "2026-07-24T23:16",
+    0.007176,
+    275307.0
    ]
   ],
   "trough_px": 0.004795,
@@ -164,7 +169,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 86.6,
   "active": false,
-  "missing_streak": 21,
+  "missing_streak": 22,
   "ended_utc": "2026-07-23T06:39:56.882343+00:00",
   "reactivations": 2,
   "path": [
@@ -917,6 +922,11 @@
     "2026-07-24T21:20",
     0.003412,
     429825.0
+   ],
+   [
+    "2026-07-24T23:16",
+    0.00312,
+    411886.0
    ]
   ],
   "peak_px": 0.0111721605160641,
@@ -963,9 +973,9 @@
   "price_at_signal": 0.0134431399906077,
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 93.0,
-  "active": true,
-  "missing_streak": 2,
-  "ended_utc": null,
+  "active": false,
+  "missing_streak": 3,
+  "ended_utc": "2026-07-24T23:16:11.372753+00:00",
   "reactivations": 1,
   "path": [
    [
@@ -1792,6 +1802,11 @@
     "2026-07-24T21:20",
     0.01577,
     804790.0
+   ],
+   [
+    "2026-07-24T23:16",
+    0.01533,
+    775045.0
    ]
   ],
   "peak_px": 0.0349284046202651,
@@ -2014,7 +2029,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 88.1,
   "active": true,
-  "missing_streak": 0,
+  "missing_streak": 1,
   "ended_utc": null,
   "reactivations": 8,
   "path": [
@@ -2962,6 +2977,11 @@
     "2026-07-24T21:20",
     0.04621,
     1608352.0
+   ],
+   [
+    "2026-07-24T23:16",
+    0.04103,
+    1518973.0
    ]
   ],
   "peak_px": 0.04621,
@@ -3115,6 +3135,11 @@
     "2026-07-24T21:20",
     17837,
     10.0
+   ],
+   [
+    "2026-07-24T23:16",
+    17902,
+    10.0
    ]
   ]
  },
@@ -3129,7 +3154,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 92.9,
   "active": false,
-  "missing_streak": 110,
+  "missing_streak": 111,
   "ended_utc": "2026-07-15T23:14:06.250202+00:00",
   "reactivations": 1,
   "path": [
@@ -4047,7 +4072,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 89.5,
   "active": true,
-  "missing_streak": 0,
+  "missing_streak": 1,
   "ended_utc": null,
   "reactivations": 5,
   "path": [
@@ -5040,6 +5065,11 @@
     "2026-07-24T21:20",
     0.05094,
     3418279.0
+   ],
+   [
+    "2026-07-24T23:16",
+    0.05092,
+    3418156.0
    ]
   ],
   "peak_px": 0.172471238342806,
@@ -5208,6 +5238,11 @@
     "2026-07-24T21:20",
     33964,
     14.6
+   ],
+   [
+    "2026-07-24T23:16",
+    33942,
+    14.6
    ]
   ]
  },
@@ -5222,7 +5257,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 85.5,
   "active": false,
-  "missing_streak": 114,
+  "missing_streak": 115,
   "ended_utc": "2026-07-15T17:38:40.290578+00:00",
   "reactivations": 0,
   "path": [
@@ -6145,7 +6180,7 @@
   "price_at_signal_source": "candela oraria GeckoTerminal (stima)",
   "score_at_signal": 84.4,
   "active": false,
-  "missing_streak": 68,
+  "missing_streak": 69,
   "ended_utc": "2026-07-19T06:42:56.731377+00:00",
   "reactivations": 4,
   "path": [
@@ -7258,6 +7293,11 @@
     "2026-07-24T21:20",
     0.2741,
     148197.0
+   ],
+   [
+    "2026-07-24T23:16",
+    0.2606,
+    144664.0
    ]
   ],
   "peak_px": 2.9989500457923,
@@ -7288,7 +7328,7 @@
   "price_at_signal_source": "candela oraria GeckoTerminal (stima)",
   "score_at_signal": 85.1,
   "active": false,
-  "missing_streak": 113,
+  "missing_streak": 114,
   "ended_utc": "2026-07-15T19:36:37.393908+00:00",
   "reactivations": 2,
   "path": [
