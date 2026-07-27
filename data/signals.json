@@ -10,7 +10,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 87.3,
   "active": false,
-  "missing_streak": 44,
+  "missing_streak": 45,
   "ended_utc": "2026-07-24T00:10:43.879240+00:00",
   "reactivations": 0,
   "path": [
@@ -258,6 +258,11 @@
     "2026-07-27T11:38",
     0.007007,
     293995.0
+   ],
+   [
+    "2026-07-27T15:13",
+    0.007103,
+    293966.0
    ]
   ],
   "trough_px": 0.004795,
@@ -324,7 +329,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 86.6,
   "active": false,
-  "missing_streak": 53,
+  "missing_streak": 54,
   "ended_utc": "2026-07-23T06:39:56.882343+00:00",
   "reactivations": 2,
   "path": [
@@ -1237,6 +1242,11 @@
     "2026-07-27T11:38",
     0.004163,
     481012.0
+   ],
+   [
+    "2026-07-27T15:13",
+    0.003382,
+    431423.0
    ]
   ],
   "peak_px": 0.0111721605160641,
@@ -2272,6 +2282,11 @@
     "2026-07-27T11:38",
     0.01329,
     694362.0
+   ],
+   [
+    "2026-07-27T15:13",
+    0.01493,
+    728273.0
    ]
   ],
   "peak_px": 0.0349284046202651,
@@ -2570,6 +2585,11 @@
     "2026-07-27T11:38",
     10229,
     13.1
+   ],
+   [
+    "2026-07-27T15:13",
+    10240,
+    13.0
    ]
   ]
  },
@@ -2584,7 +2604,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 88.1,
   "active": true,
-  "missing_streak": 1,
+  "missing_streak": 0,
   "ended_utc": null,
   "reactivations": 10,
   "path": [
@@ -3692,13 +3712,18 @@
     "2026-07-27T11:38",
     0.06016,
     1692411.0
+   ],
+   [
+    "2026-07-27T15:13",
+    0.06032,
+    1734055.0
    ]
   ],
-  "peak_px": 0.06016,
-  "peak_utc": "2026-07-27T11:38",
+  "peak_px": 0.06032,
+  "peak_utc": "2026-07-27T15:13",
   "trough_px": 0.00317872371792969,
   "trough_utc": "2026-07-17T00:00",
-  "mfe_pct": 320.2,
+  "mfe_pct": 321.3,
   "mae_pct": -77.8,
   "path_backfilled": true,
   "paper": {
@@ -3885,6 +3910,11 @@
     "2026-07-27T11:38",
     19889,
     9.6
+   ],
+   [
+    "2026-07-27T15:13",
+    20144,
+    9.6
    ]
   ]
  },
@@ -3899,7 +3929,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 92.9,
   "active": false,
-  "missing_streak": 142,
+  "missing_streak": 143,
   "ended_utc": "2026-07-15T23:14:06.250202+00:00",
   "reactivations": 1,
   "path": [
@@ -4817,7 +4847,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 89.5,
   "active": true,
-  "missing_streak": 1,
+  "missing_streak": 2,
   "ended_utc": null,
   "reactivations": 9,
   "path": [
@@ -5970,14 +6000,19 @@
     "2026-07-27T11:38",
     0.03971,
     2805927.0
+   ],
+   [
+    "2026-07-27T15:13",
+    0.03625,
+    2760831.0
    ]
   ],
   "peak_px": 0.172471238342806,
   "peak_utc": "2026-07-14T23:00",
-  "trough_px": 0.0388140930021796,
-  "trough_utc": "2026-07-17T21:00",
+  "trough_px": 0.03625,
+  "trough_utc": "2026-07-27T15:13",
   "mfe_pct": 5.1,
-  "mae_pct": -76.4,
+  "mae_pct": -77.9,
   "path_backfilled": true,
   "paper": {
    "status": "chiuso",
@@ -6253,6 +6288,11 @@
     "2026-07-27T11:38",
     34021,
     15.1
+   ],
+   [
+    "2026-07-27T15:13",
+    33981,
+    15.5
    ]
   ]
  },
@@ -6267,7 +6307,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 85.5,
   "active": false,
-  "missing_streak": 146,
+  "missing_streak": 147,
   "ended_utc": "2026-07-15T17:38:40.290578+00:00",
   "reactivations": 0,
   "path": [
@@ -7190,7 +7230,7 @@
   "price_at_signal_source": "candela oraria GeckoTerminal (stima)",
   "score_at_signal": 84.4,
   "active": false,
-  "missing_streak": 100,
+  "missing_streak": 101,
   "ended_utc": "2026-07-19T06:42:56.731377+00:00",
   "reactivations": 4,
   "path": [
@@ -8418,7 +8458,7 @@
   "price_at_signal_source": "candela oraria GeckoTerminal (stima)",
   "score_at_signal": 85.1,
   "active": false,
-  "missing_streak": 145,
+  "missing_streak": 146,
   "ended_utc": "2026-07-15T19:36:37.393908+00:00",
   "reactivations": 2,
   "path": [
