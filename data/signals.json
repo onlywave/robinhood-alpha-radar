@@ -10,7 +10,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 91.1,
   "active": true,
-  "missing_streak": 1,
+  "missing_streak": 0,
   "ended_utc": null,
   "reactivations": 2,
   "path": [
@@ -93,6 +93,11 @@
     "2026-07-31T07:13",
     0.00241,
     8760841.0
+   ],
+   [
+    "2026-07-31T09:59",
+    0.00223,
+    8072066.0
    ]
   ],
   "peak_px": 0.003119,
@@ -155,6 +160,11 @@
     "2026-07-31T07:13",
     5668,
     8.0
+   ],
+   [
+    "2026-07-31T09:59",
+    5670,
+    8.0
    ]
   ],
   "paper": {
@@ -182,7 +192,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 87.3,
   "active": true,
-  "missing_streak": 1,
+  "missing_streak": 0,
   "ended_utc": null,
   "reactivations": 4,
   "path": [
@@ -625,6 +635,11 @@
     "2026-07-31T07:13",
     0.01879,
     541463.0
+   ],
+   [
+    "2026-07-31T09:59",
+    0.01744,
+    527253.0
    ]
   ],
   "trough_px": 0.004795,
@@ -752,6 +767,11 @@
     "2026-07-31T07:13",
     3309,
     18.1
+   ],
+   [
+    "2026-07-31T09:59",
+    3346,
+    17.7
    ]
   ],
   "paper": {
@@ -776,7 +796,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 86.6,
   "active": false,
-  "missing_streak": 92,
+  "missing_streak": 93,
   "ended_utc": "2026-07-23T06:39:56.882343+00:00",
   "reactivations": 2,
   "path": [
@@ -1876,7 +1896,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 93.0,
   "active": false,
-  "missing_streak": 35,
+  "missing_streak": 36,
   "ended_utc": "2026-07-28T03:34:48.626268+00:00",
   "reactivations": 5,
   "path": [
@@ -3059,6 +3079,11 @@
     "2026-07-31T07:13",
     0.01381,
     783670.0
+   ],
+   [
+    "2026-07-31T09:59",
+    0.01384,
+    781610.0
    ]
   ],
   "peak_px": 0.0349284046202651,
@@ -3401,7 +3426,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 88.1,
   "active": false,
-  "missing_streak": 5,
+  "missing_streak": 6,
   "ended_utc": "2026-07-31T00:15:29.036869+00:00",
   "reactivations": 13,
   "path": [
@@ -4704,6 +4729,11 @@
     "2026-07-31T07:13",
     0.03767,
     1626240.0
+   ],
+   [
+    "2026-07-31T09:59",
+    0.0354,
+    1574257.0
    ]
   ],
   "peak_px": 0.06032,
@@ -4971,7 +5001,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 92.9,
   "active": false,
-  "missing_streak": 181,
+  "missing_streak": 182,
   "ended_utc": "2026-07-15T23:14:06.250202+00:00",
   "reactivations": 1,
   "path": [
@@ -5889,7 +5919,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 89.5,
   "active": false,
-  "missing_streak": 22,
+  "missing_streak": 23,
   "ended_utc": "2026-07-29T12:20:32.431847+00:00",
   "reactivations": 10,
   "path": [
@@ -7237,6 +7267,11 @@
     "2026-07-31T07:13",
     0.04663,
     3885934.0
+   ],
+   [
+    "2026-07-31T09:59",
+    0.04675,
+    3740095.0
    ]
   ],
   "peak_px": 0.172471238342806,
@@ -7554,7 +7589,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 85.5,
   "active": false,
-  "missing_streak": 185,
+  "missing_streak": 186,
   "ended_utc": "2026-07-15T17:38:40.290578+00:00",
   "reactivations": 0,
   "path": [
@@ -8477,7 +8512,7 @@
   "price_at_signal_source": "candela oraria GeckoTerminal (stima)",
   "score_at_signal": 84.4,
   "active": false,
-  "missing_streak": 139,
+  "missing_streak": 140,
   "ended_utc": "2026-07-19T06:42:56.731377+00:00",
   "reactivations": 4,
   "path": [
@@ -9705,7 +9740,7 @@
   "price_at_signal_source": "candela oraria GeckoTerminal (stima)",
   "score_at_signal": 85.1,
   "active": true,
-  "missing_streak": 1,
+  "missing_streak": 2,
   "ended_utc": null,
   "reactivations": 3,
   "path": [
@@ -10798,6 +10833,11 @@
     "2026-07-31T07:13",
     0.003298,
     281514.0
+   ],
+   [
+    "2026-07-31T09:59",
+    0.003547,
+    291658.0
    ]
   ],
   "peak_px": 0.0130371095827503,
@@ -10881,6 +10921,11 @@
     "2026-07-31T07:13",
     13177,
     11.8
+   ],
+   [
+    "2026-07-31T09:59",
+    13183,
+    11.7
    ]
   ]
  }
