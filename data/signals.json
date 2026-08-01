@@ -10,7 +10,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 91.1,
   "active": false,
-  "missing_streak": 4,
+  "missing_streak": 5,
   "ended_utc": "2026-08-01T06:40:29.929994+00:00",
   "reactivations": 3,
   "path": [
@@ -148,6 +148,11 @@
     "2026-08-01T09:20",
     0.002382,
     8245724.0
+   ],
+   [
+    "2026-08-01T11:34",
+    0.002266,
+    8037393.0
    ]
   ],
   "peak_px": 0.003119,
@@ -272,7 +277,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 87.3,
   "active": true,
-  "missing_streak": 1,
+  "missing_streak": 2,
   "ended_utc": null,
   "reactivations": 4,
   "path": [
@@ -770,6 +775,11 @@
     "2026-08-01T09:20",
     0.02625,
     660495.0
+   ],
+   [
+    "2026-08-01T11:34",
+    0.02374,
+    634159.0
    ]
   ],
   "trough_px": 0.004795,
@@ -952,6 +962,11 @@
     "2026-08-01T09:20",
     3795,
     17.7
+   ],
+   [
+    "2026-08-01T11:34",
+    3832,
+    16.7
    ]
   ],
   "paper": {
@@ -976,7 +991,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 86.6,
   "active": false,
-  "missing_streak": 103,
+  "missing_streak": 104,
   "ended_utc": "2026-07-23T06:39:56.882343+00:00",
   "reactivations": 2,
   "path": [
@@ -2076,7 +2091,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 93.0,
   "active": false,
-  "missing_streak": 46,
+  "missing_streak": 47,
   "ended_utc": "2026-07-28T03:34:48.626268+00:00",
   "reactivations": 5,
   "path": [
@@ -3314,6 +3329,11 @@
     "2026-08-01T09:20",
     0.01277,
     726279.0
+   ],
+   [
+    "2026-08-01T11:34",
+    0.01252,
+    716489.0
    ]
   ],
   "peak_px": 0.0349284046202651,
@@ -3655,9 +3675,9 @@
   "price_at_signal": 0.0143172092286897,
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 88.1,
-  "active": true,
-  "missing_streak": 2,
-  "ended_utc": null,
+  "active": false,
+  "missing_streak": 3,
+  "ended_utc": "2026-08-01T11:34:54.588233+00:00",
   "reactivations": 14,
   "path": [
    [
@@ -5014,6 +5034,11 @@
     "2026-08-01T09:20",
     0.0246,
     1362233.0
+   ],
+   [
+    "2026-08-01T11:34",
+    0.02574,
+    1396827.0
    ]
   ],
   "peak_px": 0.06032,
@@ -5296,7 +5321,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 92.9,
   "active": false,
-  "missing_streak": 192,
+  "missing_streak": 193,
   "ended_utc": "2026-07-15T23:14:06.250202+00:00",
   "reactivations": 1,
   "path": [
@@ -6214,7 +6239,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 89.5,
   "active": false,
-  "missing_streak": 33,
+  "missing_streak": 34,
   "ended_utc": "2026-07-29T12:20:32.431847+00:00",
   "reactivations": 10,
   "path": [
@@ -7617,6 +7642,11 @@
     "2026-08-01T09:20",
     0.04015,
     3358198.0
+   ],
+   [
+    "2026-08-01T11:34",
+    0.04035,
+    3325928.0
    ]
   ],
   "peak_px": 0.172471238342806,
@@ -7934,7 +7964,7 @@
   "price_at_signal_source": "prezzo live alla scansione del segnale",
   "score_at_signal": 85.5,
   "active": false,
-  "missing_streak": 196,
+  "missing_streak": 197,
   "ended_utc": "2026-07-15T17:38:40.290578+00:00",
   "reactivations": 0,
   "path": [
@@ -8857,7 +8887,7 @@
   "price_at_signal_source": "candela oraria GeckoTerminal (stima)",
   "score_at_signal": 84.4,
   "active": false,
-  "missing_streak": 150,
+  "missing_streak": 151,
   "ended_utc": "2026-07-19T06:42:56.731377+00:00",
   "reactivations": 4,
   "path": [
@@ -10085,7 +10115,7 @@
   "price_at_signal_source": "candela oraria GeckoTerminal (stima)",
   "score_at_signal": 85.1,
   "active": false,
-  "missing_streak": 12,
+  "missing_streak": 13,
   "ended_utc": "2026-07-31T12:16:31.559558+00:00",
   "reactivations": 3,
   "path": [
@@ -11233,6 +11263,11 @@
     "2026-08-01T09:20",
     0.003941,
     309674.0
+   ],
+   [
+    "2026-08-01T11:34",
+    0.004518,
+    331245.0
    ]
   ],
   "peak_px": 0.0130371095827503,
