@@ -1,5 +1,5 @@
 {
- "built_utc": "2026-08-08T02:20:49.140600+00:00",
+ "built_utc": "2026-08-09T02:27:56.692853+00:00",
  "early_window_hours": 30,
  "tokens": {
   "winners": [
@@ -12,6 +12,7 @@
    "ARROW"
   ],
   "losers": [
+   "FRONG",
    "Liluni",
    "LOXI",
    "PIPEDOG",
@@ -20,17 +21,145 @@
    "HOODRAT"
   ],
   "skipped": [
+   "ARROW",
+   "FRONG",
    "Liluni",
-   "PIPEDOG"
+   "LOXI",
+   "PIPEDOG",
+   "WISHBONE",
+   "CASHCAT",
+   "HOODRAT"
   ]
  },
- "n_early_wallets_seen": 3693,
+ "n_early_wallets_seen": 2225,
  "wallets": [
+  {
+   "address": "0x09ad820aac5779683b481c4674208a4e1b024afa",
+   "winners": 6,
+   "losers": 0,
+   "score": 6,
+   "tokens_won": [
+    "IF",
+    "MARIAN",
+    "PONS",
+    "TENDIES",
+    "WALLET",
+    "WOOF"
+   ]
+  },
+  {
+   "address": "0x73991a25c818bf1f1128deaab1492d45638de0d3",
+   "winners": 6,
+   "losers": 0,
+   "score": 6,
+   "tokens_won": [
+    "IF",
+    "MARIAN",
+    "PONS",
+    "TENDIES",
+    "WALLET",
+    "WOOF"
+   ]
+  },
+  {
+   "address": "0x8876789976decbfcbbbe364623c63652db8c0904",
+   "winners": 6,
+   "losers": 0,
+   "score": 6,
+   "tokens_won": [
+    "IF",
+    "MARIAN",
+    "PONS",
+    "TENDIES",
+    "WALLET",
+    "WOOF"
+   ]
+  },
+  {
+   "address": "0xb92fe925dc43a0ecde6c8b1a2709c170ec4fff4f",
+   "winners": 6,
+   "losers": 0,
+   "score": 6,
+   "tokens_won": [
+    "IF",
+    "MARIAN",
+    "PONS",
+    "TENDIES",
+    "WALLET",
+    "WOOF"
+   ]
+  },
+  {
+   "address": "0x48a097df16c7844a33b1c3d11ab353457846e13f",
+   "winners": 6,
+   "losers": 0,
+   "score": 6,
+   "tokens_won": [
+    "IF",
+    "MARIAN",
+    "PONS",
+    "TENDIES",
+    "WALLET",
+    "WOOF"
+   ]
+  },
+  {
+   "address": "0x5a705de8982235a7fa45bb83dcacf03a211389c7",
+   "winners": 6,
+   "losers": 0,
+   "score": 6,
+   "tokens_won": [
+    "IF",
+    "MARIAN",
+    "PONS",
+    "TENDIES",
+    "WALLET",
+    "WOOF"
+   ]
+  },
+  {
+   "address": "0x8f10b468b06c6fd214b65f87778827f7d113f996",
+   "winners": 5,
+   "losers": 0,
+   "score": 5,
+   "tokens_won": [
+    "IF",
+    "MARIAN",
+    "TENDIES",
+    "WALLET",
+    "WOOF"
+   ]
+  },
+  {
+   "address": "0xc94135b63772b91d79d0a2daab2a8801f32359bd",
+   "winners": 5,
+   "losers": 0,
+   "score": 5,
+   "tokens_won": [
+    "IF",
+    "MARIAN",
+    "PONS",
+    "TENDIES",
+    "WOOF"
+   ]
+  },
+  {
+   "address": "0xbdbae060cbab0e9cfe802a7513dd5ecb36cda6c3",
+   "winners": 4,
+   "losers": 0,
+   "score": 4,
+   "tokens_won": [
+    "IF",
+    "TENDIES",
+    "WALLET",
+    "WOOF"
+   ]
+  },
   {
    "address": "0x547dd6e4b0296446837d15776e1d9318ba20824f",
    "winners": 4,
-   "losers": 1,
-   "score": 3,
+   "losers": 0,
+   "score": 4,
    "tokens_won": [
     "IF",
     "MARIAN",
@@ -39,24 +168,46 @@
    ]
   },
   {
-   "address": "0x9ce497257d674ffa8149d410ad0b916cf095ae74",
+   "address": "0xe58b3089df6667fbf99b75595a1671baf6797d6d",
    "winners": 3,
    "losers": 0,
    "score": 3,
    "tokens_won": [
-    "ARROW",
     "MARIAN",
-    "WALLET"
+    "WALLET",
+    "WOOF"
    ]
   },
   {
-   "address": "0x9dfc840576e285ee2d08358098d26cb02c0782cc",
+   "address": "0x2b5f704ab7061fb4dbfc5876b024f4bdb2f5e8b6",
    "winners": 3,
    "losers": 0,
    "score": 3,
    "tokens_won": [
-    "ARROW",
+    "IF",
+    "TENDIES",
+    "WOOF"
+   ]
+  },
+  {
+   "address": "0xe90ef1e675f99ff9e185233b21ec1590c36f1774",
+   "winners": 3,
+   "losers": 0,
+   "score": 3,
+   "tokens_won": [
+    "IF",
     "MARIAN",
+    "TENDIES"
+   ]
+  },
+  {
+   "address": "0xcc90cf56e5bd645974326111a86fd05da8ec2a2c",
+   "winners": 3,
+   "losers": 0,
+   "score": 3,
+   "tokens_won": [
+    "IF",
+    "TENDIES",
     "WALLET"
    ]
   },
@@ -72,36 +223,43 @@
    ]
   },
   {
-   "address": "0x57a9c5b3830092975065b0b57abaaa853dbd7faf",
-   "winners": 3,
+   "address": "0x173b484556fba0b088bce92709f98bf0986ad033",
+   "winners": 2,
    "losers": 0,
-   "score": 3,
+   "score": 2,
    "tokens_won": [
-    "ARROW",
-    "MARIAN",
-    "WALLET"
+    "WALLET",
+    "WOOF"
    ]
   },
   {
-   "address": "0xf0f3ed6770ea3384fbab749da0cebf3dc9a794ab",
-   "winners": 3,
+   "address": "0x00000000cf1cd5867be5d90b99a6ebd683bc031c",
+   "winners": 2,
    "losers": 0,
-   "score": 3,
+   "score": 2,
    "tokens_won": [
-    "ARROW",
-    "MARIAN",
-    "TENDIES"
+    "IF",
+    "WOOF"
    ]
   },
   {
-   "address": "0x1cbe2b0f22dd05452db93a10f9a5d2397f26105e",
-   "winners": 3,
+   "address": "0x63bbdcefc897d1c46d48ab299b434577ddbd9f53",
+   "winners": 2,
    "losers": 0,
-   "score": 3,
+   "score": 2,
    "tokens_won": [
-    "ARROW",
-    "MARIAN",
-    "TENDIES"
+    "WALLET",
+    "WOOF"
+   ]
+  },
+  {
+   "address": "0xb300000b72deaeb607a12d5f54773d1c19c7028d",
+   "winners": 2,
+   "losers": 0,
+   "score": 2,
+   "tokens_won": [
+    "TENDIES",
+    "WOOF"
    ]
   },
   {
@@ -125,6 +283,26 @@
    ]
   },
   {
+   "address": "0xb4acbc082b5e7ded571c98ee4257778a9d784b36",
+   "winners": 2,
+   "losers": 0,
+   "score": 2,
+   "tokens_won": [
+    "IF",
+    "WOOF"
+   ]
+  },
+  {
+   "address": "0x8e71cd61eac2532a31ee13218bd16eafe90ead15",
+   "winners": 2,
+   "losers": 0,
+   "score": 2,
+   "tokens_won": [
+    "TENDIES",
+    "WOOF"
+   ]
+  },
+  {
    "address": "0x0067e109b3810470af12170da164ee6705b6228b",
    "winners": 2,
    "losers": 0,
@@ -136,6 +314,16 @@
   },
   {
    "address": "0x74b26ec2754dcbd27e43a2a527e38005358a772e",
+   "winners": 2,
+   "losers": 0,
+   "score": 2,
+   "tokens_won": [
+    "IF",
+    "WOOF"
+   ]
+  },
+  {
+   "address": "0x0823d964766b8c922313fa536ad971f62c604f55",
    "winners": 2,
    "losers": 0,
    "score": 2,
@@ -175,12 +363,52 @@
    ]
   },
   {
+   "address": "0xd26db9968dc0a0cca6dc5ce673dafeee2a0ab287",
+   "winners": 2,
+   "losers": 0,
+   "score": 2,
+   "tokens_won": [
+    "PONS",
+    "WOOF"
+   ]
+  },
+  {
    "address": "0xa2ffb67af1bda44ff7edbfe1745143017cfedfe4",
    "winners": 2,
    "losers": 0,
    "score": 2,
    "tokens_won": [
     "IF",
+    "WOOF"
+   ]
+  },
+  {
+   "address": "0x46d8ae3613d0632b476c49b6e69753cc0743fc02",
+   "winners": 2,
+   "losers": 0,
+   "score": 2,
+   "tokens_won": [
+    "WALLET",
+    "WOOF"
+   ]
+  },
+  {
+   "address": "0x1a647f98c3529de86faaa8a97c7a1e63dca714c0",
+   "winners": 2,
+   "losers": 0,
+   "score": 2,
+   "tokens_won": [
+    "MARIAN",
+    "WOOF"
+   ]
+  },
+  {
+   "address": "0x89602acbf0f43e68507e3abf8ce57fffb4684ab3",
+   "winners": 2,
+   "losers": 0,
+   "score": 2,
+   "tokens_won": [
+    "WALLET",
     "WOOF"
    ]
   },
@@ -255,13 +483,13 @@
    ]
   },
   {
-   "address": "0x5dcff58f348615c6bd1c73071b44282100bf292b",
+   "address": "0x867ab60b3d5655e5ba51e636ec160ffcffe5fa97",
    "winners": 2,
    "losers": 0,
    "score": 2,
    "tokens_won": [
-    "ARROW",
-    "IF"
+    "IF",
+    "TENDIES"
    ]
   },
   {
@@ -272,6 +500,26 @@
    "tokens_won": [
     "IF",
     "WALLET"
+   ]
+  },
+  {
+   "address": "0x7ebfcfcf9bc7bc4ae85cd62c0de27677e02ef0b7",
+   "winners": 2,
+   "losers": 0,
+   "score": 2,
+   "tokens_won": [
+    "IF",
+    "MARIAN"
+   ]
+  },
+  {
+   "address": "0x41ebf068339c46ff5802915fa40b47389c4961b1",
+   "winners": 2,
+   "losers": 0,
+   "score": 2,
+   "tokens_won": [
+    "IF",
+    "TENDIES"
    ]
   },
   {
@@ -325,17 +573,27 @@
    ]
   },
   {
-   "address": "0x3f9c2c379194fbe2f5fe3c694140c868fcdc14a2",
+   "address": "0x9ce497257d674ffa8149d410ad0b916cf095ae74",
    "winners": 2,
    "losers": 0,
    "score": 2,
    "tokens_won": [
-    "ARROW",
+    "MARIAN",
     "WALLET"
    ]
   },
   {
    "address": "0x4c0f234674a4963384a975951d82b6d0a3a4bcda",
+   "winners": 2,
+   "losers": 0,
+   "score": 2,
+   "tokens_won": [
+    "MARIAN",
+    "WALLET"
+   ]
+  },
+  {
+   "address": "0x9dfc840576e285ee2d08358098d26cb02c0782cc",
    "winners": 2,
    "losers": 0,
    "score": 2,
@@ -375,16 +633,6 @@
    ]
   },
   {
-   "address": "0xee6f39a5ec2cce906270a701fd5f5cb747ae33bd",
-   "winners": 2,
-   "losers": 0,
-   "score": 2,
-   "tokens_won": [
-    "ARROW",
-    "WALLET"
-   ]
-  },
-  {
    "address": "0x973c3bdecc5364a92f7c36d4d8dc70277a01b9df",
    "winners": 2,
    "losers": 0,
@@ -415,22 +663,22 @@
    ]
   },
   {
-   "address": "0xde29c95f47900298053098dd822e358345781aa9",
-   "winners": 2,
-   "losers": 0,
-   "score": 2,
-   "tokens_won": [
-    "ARROW",
-    "WALLET"
-   ]
-  },
-  {
    "address": "0xb969b36128bacaf9d5ef5df6345a9b78f66e15f4",
    "winners": 2,
    "losers": 0,
    "score": 2,
    "tokens_won": [
     "TENDIES",
+    "WALLET"
+   ]
+  },
+  {
+   "address": "0x57a9c5b3830092975065b0b57abaaa853dbd7faf",
+   "winners": 2,
+   "losers": 0,
+   "score": 2,
+   "tokens_won": [
+    "MARIAN",
     "WALLET"
    ]
   },
@@ -445,26 +693,6 @@
    ]
   },
   {
-   "address": "0x21ef1962ecaa91c647a099a6cd46f20997c8d63d",
-   "winners": 2,
-   "losers": 0,
-   "score": 2,
-   "tokens_won": [
-    "ARROW",
-    "WALLET"
-   ]
-  },
-  {
-   "address": "0xd15a0e8a3409b7d967a4de23de7f66794bc6b96b",
-   "winners": 2,
-   "losers": 0,
-   "score": 2,
-   "tokens_won": [
-    "ARROW",
-    "WALLET"
-   ]
-  },
-  {
    "address": "0xca992dc22d8d77549f5fad6442603248e57b9396",
    "winners": 2,
    "losers": 0,
@@ -475,12 +703,32 @@
    ]
   },
   {
+   "address": "0x1e832ba8e59f1182fdd36218f6889887eec641fe",
+   "winners": 2,
+   "losers": 0,
+   "score": 2,
+   "tokens_won": [
+    "TENDIES",
+    "WALLET"
+   ]
+  },
+  {
    "address": "0x72f1bf04f6f471ae395013d6f06b1a2434e88bc4",
    "winners": 2,
    "losers": 0,
    "score": 2,
    "tokens_won": [
     "MARIAN",
+    "WALLET"
+   ]
+  },
+  {
+   "address": "0x81eccbcf8e59d6cc42c2ab3196e9637a5ea1a154",
+   "winners": 2,
+   "losers": 0,
+   "score": 2,
+   "tokens_won": [
+    "TENDIES",
     "WALLET"
    ]
   },
@@ -505,16 +753,6 @@
    ]
   },
   {
-   "address": "0x8ca347de0357176fd98c47fe2ce7e0ffd2710e96",
-   "winners": 2,
-   "losers": 0,
-   "score": 2,
-   "tokens_won": [
-    "ARROW",
-    "WALLET"
-   ]
-  },
-  {
    "address": "0x457f323e4f0d36b12935183c079c66cc8f6b1e45",
    "winners": 2,
    "losers": 0,
@@ -531,6 +769,16 @@
    "score": 2,
    "tokens_won": [
     "MARIAN",
+    "TENDIES"
+   ]
+  },
+  {
+   "address": "0x2e209a99c4529106fec78fbeadce0c4991d8955a",
+   "winners": 2,
+   "losers": 0,
+   "score": 2,
+   "tokens_won": [
+    "PONS",
     "TENDIES"
    ]
   },
@@ -555,22 +803,22 @@
    ]
   },
   {
-   "address": "0xc62fd5289f9b4067360b9abf9d7a24b031ed1e2a",
-   "winners": 2,
-   "losers": 0,
-   "score": 2,
-   "tokens_won": [
-    "ARROW",
-    "TENDIES"
-   ]
-  },
-  {
    "address": "0x35b01f4d927bf314bfca1489d96f7c5a33902d6f",
    "winners": 2,
    "losers": 0,
    "score": 2,
    "tokens_won": [
     "PONS",
+    "TENDIES"
+   ]
+  },
+  {
+   "address": "0xf0f3ed6770ea3384fbab749da0cebf3dc9a794ab",
+   "winners": 2,
+   "losers": 0,
+   "score": 2,
+   "tokens_won": [
+    "MARIAN",
     "TENDIES"
    ]
   },
@@ -605,12 +853,12 @@
    ]
   },
   {
-   "address": "0xa07e0bb5564db29065c5c5754d82abccf0bf82c3",
+   "address": "0x1cbe2b0f22dd05452db93a10f9a5d2397f26105e",
    "winners": 2,
    "losers": 0,
    "score": 2,
    "tokens_won": [
-    "ARROW",
+    "MARIAN",
     "TENDIES"
    ]
   },
@@ -645,32 +893,22 @@
    ]
   },
   {
-   "address": "0x27eb45fe3fc8456af229aa10135c0b31b5a923bc",
+   "address": "0xe0d4c69839ee6d8d6be2133a6af51d2bae27dc2d",
    "winners": 2,
    "losers": 0,
    "score": 2,
    "tokens_won": [
-    "ARROW",
+    "MARIAN",
     "TENDIES"
    ]
   },
   {
-   "address": "0x50497035f19f832d99b5371e0e688bf4e354364c",
+   "address": "0xe531f6260beb09d9b122dfdc3d67085b77fedf8c",
    "winners": 2,
    "losers": 0,
    "score": 2,
    "tokens_won": [
-    "ARROW",
-    "TENDIES"
-   ]
-  },
-  {
-   "address": "0x53a8d422388cab1c1309b3d7b2b9bd4d73f59c64",
-   "winners": 2,
-   "losers": 0,
-   "score": 2,
-   "tokens_won": [
-    "ARROW",
+    "PONS",
     "TENDIES"
    ]
   },
@@ -705,6 +943,16 @@
    ]
   },
   {
+   "address": "0xfa42ca38d896763bffd09c42e192eb21d2df8faa",
+   "winners": 2,
+   "losers": 0,
+   "score": 2,
+   "tokens_won": [
+    "MARIAN",
+    "PONS"
+   ]
+  },
+  {
    "address": "0x56a697440c3bba73d38975dcd2dad284af1bbe46",
    "winners": 2,
    "losers": 0,
@@ -725,16 +973,6 @@
    ]
   },
   {
-   "address": "0xcab2e5f5c4a4b6517b891ab231357f38d2427f66",
-   "winners": 2,
-   "losers": 0,
-   "score": 2,
-   "tokens_won": [
-    "ARROW",
-    "PONS"
-   ]
-  },
-  {
    "address": "0xbbc887deb100aeff7619cb85bb7be73ef1f697d4",
    "winners": 2,
    "losers": 0,
@@ -742,248 +980,6 @@
    "tokens_won": [
     "MARIAN",
     "PONS"
-   ]
-  },
-  {
-   "address": "0x10734d3444535d23c6d271bf912ed415585fa894",
-   "winners": 2,
-   "losers": 0,
-   "score": 2,
-   "tokens_won": [
-    "ARROW",
-    "MARIAN"
-   ]
-  },
-  {
-   "address": "0x5b19bcd5e5218ba9a242c0e47d8f6d1f1b4a5039",
-   "winners": 2,
-   "losers": 0,
-   "score": 2,
-   "tokens_won": [
-    "ARROW",
-    "MARIAN"
-   ]
-  },
-  {
-   "address": "0x68e04cc45ff8936d944a8a545e338e0be9a0df84",
-   "winners": 2,
-   "losers": 0,
-   "score": 2,
-   "tokens_won": [
-    "ARROW",
-    "MARIAN"
-   ]
-  },
-  {
-   "address": "0xfe0f24f021314f3701dd94a727a61e1a33840f34",
-   "winners": 2,
-   "losers": 0,
-   "score": 2,
-   "tokens_won": [
-    "ARROW",
-    "MARIAN"
-   ]
-  },
-  {
-   "address": "0x1e3cf5f8b34d475b14c04ea6b8c34174a561f02e",
-   "winners": 2,
-   "losers": 0,
-   "score": 2,
-   "tokens_won": [
-    "ARROW",
-    "MARIAN"
-   ]
-  },
-  {
-   "address": "0x865915920355b43ac2fc96519d085cd8bbde9411",
-   "winners": 2,
-   "losers": 0,
-   "score": 2,
-   "tokens_won": [
-    "ARROW",
-    "MARIAN"
-   ]
-  },
-  {
-   "address": "0x6f8b4e703c4d93d148fc4dc5e33f3132fd00fd4b",
-   "winners": 2,
-   "losers": 0,
-   "score": 2,
-   "tokens_won": [
-    "ARROW",
-    "MARIAN"
-   ]
-  },
-  {
-   "address": "0x698e77dce78a7a6c02a58f46c09a884a9bff74a9",
-   "winners": 2,
-   "losers": 0,
-   "score": 2,
-   "tokens_won": [
-    "ARROW",
-    "MARIAN"
-   ]
-  },
-  {
-   "address": "0x68b48ffec961ce54f7af24a56032dec01d7dfe50",
-   "winners": 2,
-   "losers": 0,
-   "score": 2,
-   "tokens_won": [
-    "ARROW",
-    "MARIAN"
-   ]
-  },
-  {
-   "address": "0xf2859d1ec210ab6d85a737d000cfd3c3b58012a5",
-   "winners": 2,
-   "losers": 0,
-   "score": 2,
-   "tokens_won": [
-    "ARROW",
-    "MARIAN"
-   ]
-  },
-  {
-   "address": "0x6e050ba137c6bdd5e272e028aeebeede97c4861e",
-   "winners": 2,
-   "losers": 0,
-   "score": 2,
-   "tokens_won": [
-    "ARROW",
-    "MARIAN"
-   ]
-  },
-  {
-   "address": "0x4a90e406d2d5d4cb50b4ca2470f3e2756a57ddc7",
-   "winners": 2,
-   "losers": 0,
-   "score": 2,
-   "tokens_won": [
-    "ARROW",
-    "MARIAN"
-   ]
-  },
-  {
-   "address": "0x07f957be1eacb5802eea0894f0e818c02a2d9be1",
-   "winners": 2,
-   "losers": 0,
-   "score": 2,
-   "tokens_won": [
-    "ARROW",
-    "MARIAN"
-   ]
-  },
-  {
-   "address": "0xe90ef1e675f99ff9e185233b21ec1590c36f1774",
-   "winners": 3,
-   "losers": 2,
-   "score": 1,
-   "tokens_won": [
-    "IF",
-    "MARIAN",
-    "TENDIES"
-   ]
-  },
-  {
-   "address": "0xcc90cf56e5bd645974326111a86fd05da8ec2a2c",
-   "winners": 3,
-   "losers": 2,
-   "score": 1,
-   "tokens_won": [
-    "IF",
-    "TENDIES",
-    "WALLET"
-   ]
-  },
-  {
-   "address": "0x173b484556fba0b088bce92709f98bf0986ad033",
-   "winners": 2,
-   "losers": 1,
-   "score": 1,
-   "tokens_won": [
-    "WALLET",
-    "WOOF"
-   ]
-  },
-  {
-   "address": "0x8e71cd61eac2532a31ee13218bd16eafe90ead15",
-   "winners": 2,
-   "losers": 1,
-   "score": 1,
-   "tokens_won": [
-    "TENDIES",
-    "WOOF"
-   ]
-  },
-  {
-   "address": "0x867ab60b3d5655e5ba51e636ec160ffcffe5fa97",
-   "winners": 2,
-   "losers": 1,
-   "score": 1,
-   "tokens_won": [
-    "IF",
-    "TENDIES"
-   ]
-  },
-  {
-   "address": "0x7ebfcfcf9bc7bc4ae85cd62c0de27677e02ef0b7",
-   "winners": 2,
-   "losers": 1,
-   "score": 1,
-   "tokens_won": [
-    "IF",
-    "MARIAN"
-   ]
-  },
-  {
-   "address": "0x1e832ba8e59f1182fdd36218f6889887eec641fe",
-   "winners": 2,
-   "losers": 1,
-   "score": 1,
-   "tokens_won": [
-    "TENDIES",
-    "WALLET"
-   ]
-  },
-  {
-   "address": "0xaeb897d84e086f0a4cea3d47fddac7ca7d9e54e8",
-   "winners": 2,
-   "losers": 1,
-   "score": 1,
-   "tokens_won": [
-    "ARROW",
-    "WALLET"
-   ]
-  },
-  {
-   "address": "0x2e209a99c4529106fec78fbeadce0c4991d8955a",
-   "winners": 2,
-   "losers": 1,
-   "score": 1,
-   "tokens_won": [
-    "PONS",
-    "TENDIES"
-   ]
-  },
-  {
-   "address": "0xe0d4c69839ee6d8d6be2133a6af51d2bae27dc2d",
-   "winners": 2,
-   "losers": 1,
-   "score": 1,
-   "tokens_won": [
-    "MARIAN",
-    "TENDIES"
-   ]
-  },
-  {
-   "address": "0xe531f6260beb09d9b122dfdc3d67085b77fedf8c",
-   "winners": 2,
-   "losers": 1,
-   "score": 1,
-   "tokens_won": [
-    "PONS",
-    "TENDIES"
    ]
   }
  ],
