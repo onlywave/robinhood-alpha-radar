@@ -1,5 +1,5 @@
 {
- "built_utc": "2026-08-11T02:27:08.976814+00:00",
+ "built_utc": "2026-08-12T02:43:49.877374+00:00",
  "early_window_hours": 30,
  "tokens": {
   "winners": [
@@ -120,29 +120,7 @@
    ]
   },
   {
-   "address": "0xc94135b63772b91d79d0a2daab2a8801f32359bd",
-   "winners": 3,
-   "losers": 0,
-   "score": 3,
-   "tokens_won": [
-    "IF",
-    "TENDIES",
-    "WOOF"
-   ]
-  },
-  {
    "address": "0x547dd6e4b0296446837d15776e1d9318ba20824f",
-   "winners": 3,
-   "losers": 0,
-   "score": 3,
-   "tokens_won": [
-    "IF",
-    "TENDIES",
-    "WALLET"
-   ]
-  },
-  {
-   "address": "0xcc90cf56e5bd645974326111a86fd05da8ec2a2c",
    "winners": 3,
    "losers": 0,
    "score": 3,
