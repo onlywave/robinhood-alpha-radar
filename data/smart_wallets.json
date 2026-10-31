@@ -1,8 +1,10 @@
 {
- "built_utc": "2026-10-09T02:09:28.235752+00:00",
+ "built_utc": "2026-10-31T02:21:56.342529+00:00",
  "early_window_hours": 30,
  "tokens": {
   "winners": [
+   "TORCH",
+   "SWARM",
    "HOOKR",
    "CHUMP",
    "HMM",
@@ -17,6 +19,9 @@
    "ARROW"
   ],
   "losers": [
+   "casino",
+   "CLAUDIA",
+   "hoodcat",
    "PEVL",
    "STANDARD",
    "ROBIN",
@@ -30,6 +35,7 @@
    "HOODRAT"
   ],
   "skipped": [
+   "TORCH",
    "HOOKR",
    "FRONG",
    "PEVL",
@@ -41,7 +47,7 @@
    "PIPEDOG"
   ]
  },
- "n_early_wallets_seen": 4474,
+ "n_early_wallets_seen": 6066,
  "wallets": [
   {
    "address": "0x547dd6e4b0296446837d15776e1d9318ba20824f",
